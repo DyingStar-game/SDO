@@ -1,9 +1,9 @@
 #!/bin/bash
 
-read -p "Voulez-vous vraiment supprimer tous les dossiers server* ? (o/n) " confirm
-if [[ "$confirm" =~ ^[Oo]$ ]]; then
+read -p "Do you really want to delete all server* folders? (y/n) " confirm
+if [[ "$confirm" =~ ^[Yy]$ ]]; then
   rm -rf server*
-  echo "Tous les dossiers server* ont été supprimés."
+  echo "All server* folders have been deleted."
 else
-  echo "Annulé."
+  echo "Cancelled."
 fi

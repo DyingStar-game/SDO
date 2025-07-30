@@ -1,12 +1,12 @@
 #!/bin/bash
 
-read -p "Combien de serveurs voulez-vous créer ? " count
-read -p "Entrez l'identifiant (2 chiffres, ex: 12) : " id
-read -p "Entrez l'adresse IP du SDO : " sdo_ip
+read -p "How many servers do you want to create? " count
+read -p "Enter the identifier (2 digits, e.g., 12): " id
+read -p "Enter the SDO IP address: " sdo_ip
 
-# Validation rapide
+# Quick validation
 if ! [[ $id =~ ^[0-9]{2}$ ]]; then
-  echo "Identifiant invalide. Il doit être composé de 2 chiffres."
+  echo "Invalid identifier. It must be composed of 2 digits."
   exit 1
 fi
 
@@ -16,7 +16,7 @@ for ((i=1; i<=count; i++)); do
   folder="server$i"
   mkdir -p "$folder"
   
-  # Format du numéro de serveur : 01, 02, ...
+  # Server number format: 01, 02, ...
   num=$(printf "%02d" $i)
 
   cat > "$folder/server.ini" <<EOF
@@ -29,4 +29,4 @@ EOF
   ((port++))
 done
 
-echo "$count serveurs créés avec succès."
+echo "$count servers created successfully."
