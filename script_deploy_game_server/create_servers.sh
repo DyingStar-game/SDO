@@ -1,5 +1,16 @@
 #!/bin/bash
 
+echo "
+ ██████╗██████╗  ██████╗ 
+██╔════╝██╔══██╗██╔═══██╗
+███████╗██║  ██║██║   ██║
+╚════██║██║  ██║██║   ██║
+██████╔╝██████╔╝╚██████╔╝
+╚═════╝ ╚═════╝  ╚═════╝ 
+"
+echo "========== Game Server Creator =========="
+echo
+
 read -p "How many servers do you want to create? " count
 read -p "Enter the identifier (2 digits, e.g., 12): " id
 read -p "Enter the SDO IP address: " sdo_ip
