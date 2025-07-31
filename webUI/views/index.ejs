@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Deception Servers</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🌟 Star Deception Servers</h1>
+            <p>Surveillance des serveurs de jeu en temps réel</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="error-message">
+                <p>⚠️ <%= error %></p>
+            </div>
+        <% } %>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3><%= servers.length %></h3>
+                <p>Serveurs Total</p>
+            </div>
+            <div class="stat-card">
+                <h3><%= servers.filter(s => s.is_free === 1).length %></h3>
+                <p>Serveurs Libres</p>
+            </div>
+            <div class="stat-card">
+                <h3><%= servers.filter(s => s.is_free === 0).length %></h3>
+                <p>Serveurs Occupés</p>
+            </div>
+        </div>
+
+        <div class="servers-grid">
+            <% servers.forEach(server => { %>
+                <div class="server-card <%= server.is_free === 1 ? 'free' : 'occupied' %>">
+                    <div class="server-header">
+                        <h3><%= server.name %></h3>
+                        <span class="status-badge <%= server.is_free === 1 ? 'free' : 'occupied' %>">
+                            <%= server.is_free === 1 ? '✅ Libre' : '🔴 Occupé' %>
+                        </span>
+                    </div>
+                    
+                    <div class="server-info">
+                        <div class="info-row">
+                            <span class="label">🌐 Adresse:</span>
+                            <span class="value"><%= server.ip %>:<%= server.port %></span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="label">👥 Joueurs:</span>
+                            <span class="value"><%= server.current_players %>/<%= server.max_players %></span>
+                        </div>
+                        
+                        <% if (server.coordinate_x_start !== null) { %>
+                            <div class="info-row">
+                                <span class="label">📍 Coordonnées X:</span>
+                                <span class="value"><%= server.coordinate_x_start %> → <%= server.coordinate_x_end %></span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="label">📍 Coordonnées Y:</span>
+                                <span class="value"><%= server.coordinate_y_start %> → <%= server.coordinate_y_end %></span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="label">📍 Coordonnées Z:</span>
+                                <span class="value"><%= server.coordinate_z_start %> → <%= server.coordinate_z_end %></span>
+                            </div>
+                        <% } else { %>
+                            <div class="info-row">
+                                <span class="label">📍 Coordonnées:</span>
+                                <span class="value">Non définies</span>
+                            </div>
+                        <% } %>
+                        
+                        <div class="info-row">
+                            <span class="label">🕐 Créé le:</span>
+                            <span class="value"><%= new Date(server.created_at).toLocaleString('fr-FR') %></span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="label">🔄 Mis à jour:</span>
+                            <span class="value"><%= new Date(server.updated_at).toLocaleString('fr-FR') %></span>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <% if (servers.length === 0) { %>
+            <div class="no-servers">
+                <p>🔍 Aucun serveur trouvé</p>
+            </div>
+        <% } %>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Star Deception Servers - Données mises à jour automatiquement</p>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
