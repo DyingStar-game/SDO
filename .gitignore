@@ -1,6 +1,9 @@
 # Fichiers binaires volumineux du serveur dédié
 script_deploy_game_server/src/StarDeception.dedicated_server.x86_64
 
+# Dossiers de serveurs générés
+script_deploy_game_server/server*/
+
 # Autres fichiers à ignorer
 *.tmp
 *.log
