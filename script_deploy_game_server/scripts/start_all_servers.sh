@@ -5,21 +5,14 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-echo "
- ██████╗██████╗  ██████╗ 
-██╔════╝██╔══██╗██╔═══██╗
-███████╗██║  ██║██║   ██║
-╚════██║██║  ██║██║   ██║
-██████╔╝██████╔╝╚██████╔╝
-╚═════╝ ╚═════╝  ╚═════╝ 
-"
-echo "========== Start All Game Servers =========="
+echo -e "${GREEN}========== Start All Game Servers ==========${NC}"
 echo
 
 # Check if dedicated server binary exists
-binary_file="./src/StarDeception.dedicated_server.x86_64"
+binary_file="../src/StarDeception.dedicated_server.x86_64"
 if [[ ! -f "$binary_file" ]]; then
     echo -e "${RED}✗ Dedicated server binary not found: $binary_file${NC}"
     echo -e "${YELLOW}Please make sure the binary is downloaded and placed in the src/ directory.${NC}"
@@ -30,7 +23,7 @@ fi
 echo -e "${GREEN}✓ Dedicated server binary found${NC}"
 
 # Find all server directories
-server_dirs=($(find . -maxdepth 1 -type d -name "server*" | sort))
+server_dirs=($(find .. -maxdepth 1 -type d -name "server*" | sort))
 
 if [ ${#server_dirs[@]} -eq 0 ]; then
     echo -e "${RED}No server directories found. Please run create_servers.sh first.${NC}"
@@ -65,7 +58,7 @@ for dir in "${server_dirs[@]}"; do
         server_pid=$!
         echo -e "${GREEN}  ✓ Server started with PID: $server_pid${NC}"
         ((started_count++))
-        cd ..
+        cd ../scripts  # Return to scripts directory
         sleep 1  # Small delay between server starts
     else
         echo -e "${YELLOW}  ⚠ Warning: StarDeception.dedicated_server.sh not found in $dir${NC}"

@@ -21,6 +21,7 @@ show_header() {
     echo "██████╔╝██████╔╝╚██████╔╝"
     echo "╚═════╝ ╚═════╝  ╚═════╝ "
     echo -e "${NC}"
+    echo -e "${MAGENTA}🔗 GitHub: https://github.com/StarDeception/SDO${NC}"
     echo -e "${WHITE}========== StarDeception Game Server Manager ==========${NC}"
     echo
 }
@@ -153,6 +154,8 @@ create_servers() {
     echo
     
     if [[ -f "./scripts/create_servers.sh" ]]; then
+        # Ensure script has execute permissions
+        chmod +x "./scripts/create_servers.sh"
         echo -e "${BLUE}Launching server creation script...${NC}"
         echo
         ./scripts/create_servers.sh
@@ -173,6 +176,8 @@ delete_servers() {
     echo
     
     if [[ -f "./scripts/delete_servers.sh" ]]; then
+        # Ensure script has execute permissions
+        chmod +x "./scripts/delete_servers.sh"
         echo -e "${YELLOW}⚠ Warning: This will delete all server directories${NC}"
         echo
         ./scripts/delete_servers.sh
@@ -193,6 +198,8 @@ stop_all_servers() {
     echo
     
     if [[ -f "./scripts/stop_all_servers.sh" ]]; then
+        # Ensure script has execute permissions
+        chmod +x "./scripts/stop_all_servers.sh"
         echo -e "${BLUE}Launching server stop script...${NC}"
         echo
         ./scripts/stop_all_servers.sh
@@ -237,33 +244,13 @@ start_all_servers() {
     fi
     
     if [[ -f "./scripts/start_all_servers.sh" ]]; then
+        # Ensure script has execute permissions
+        chmod +x "./scripts/start_all_servers.sh"
         echo -e "${BLUE}Launching server startup script...${NC}"
         echo
         ./scripts/start_all_servers.sh
     else
         echo -e "${RED}✗ scripts/start_all_servers.sh not found${NC}"
-        read -p "Press Enter to return to main menu..."
-        return 1
-    fi
-    
-    echo
-    read -p "Press Enter to return to main menu..."
-}
-    show_header
-    echo -e "${GREEN}=== Start All Servers ===${NC}"
-    echo
-    
-    # First check and download the binary if needed
-    if ! check_and_download_binary; then
-        return 1
-    fi
-    
-    if [[ -f "./start_all_servers.sh" ]]; then
-        echo -e "${BLUE}Launching server startup script...${NC}"
-        echo
-        ./start_all_servers.sh
-    else
-        echo -e "${RED}✗ start_all_servers.sh not found${NC}"
         read -p "Press Enter to return to main menu..."
         return 1
     fi
