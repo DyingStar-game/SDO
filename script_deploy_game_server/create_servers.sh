@@ -12,7 +12,7 @@ echo "========== Game Server Creator =========="
 echo
 
 read -p "How many servers do you want to create? " count
-read -p "Enter the identifier (2 digits, e.g., 12): " id
+read -p "Enter the gameserver identifier (2 digits, e.g., 12): " id
 read -p "Enter the SDO IP address: " sdo_ip
 
 # Quick validation
@@ -36,6 +36,10 @@ name="gameserver${id}${num}"
 port=${port}
 SDO="${sdo_ip}"
 EOF
+
+  # Copy the server files from src directory
+  cp "src/StarDeception.dedicated_server.sh" "$folder/"
+  cp "src/StarDeception.dedicated_server.x86_64" "$folder/"
 
   ((port++))
 done
