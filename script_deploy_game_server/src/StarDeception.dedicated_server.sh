@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo -ne '\033c\033]0;StarDeception\a'
 base_path="$(dirname "$(realpath "$0")")"
 

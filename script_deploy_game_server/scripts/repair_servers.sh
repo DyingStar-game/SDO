@@ -45,6 +45,10 @@ for dir in "${server_dirs[@]}"; do
         cp "src/StarDeception.dedicated_server.sh" "$dir/"
         echo -e "${GREEN}  ✓ Copied StarDeception.dedicated_server.sh${NC}"
         ((files_copied++))
+    else
+        # Update existing file in case source was updated
+        cp "src/StarDeception.dedicated_server.sh" "$dir/"
+        echo -e "${BLUE}  ✓ Updated StarDeception.dedicated_server.sh${NC}"
     fi
     
     if [[ ! -f "$dir/StarDeception.dedicated_server.x86_64" ]]; then
@@ -57,6 +61,15 @@ for dir in "${server_dirs[@]}"; do
     chmod +x "$dir/StarDeception.dedicated_server.sh" 2>/dev/null
     chmod +x "$dir/StarDeception.dedicated_server.x86_64" 2>/dev/null
     echo -e "${GREEN}  ✓ Set executable permissions${NC}"
+    
+    # Fix line endings for shell scripts (convert Windows CRLF to Unix LF)
+    if command -v dos2unix >/dev/null 2>&1; then
+        dos2unix "$dir/StarDeception.dedicated_server.sh" 2>/dev/null
+        echo -e "${GREEN}  ✓ Fixed line endings${NC}"
+    elif command -v sed >/dev/null 2>&1; then
+        sed -i 's/\r$//' "$dir/StarDeception.dedicated_server.sh" 2>/dev/null
+        echo -e "${GREEN}  ✓ Fixed line endings${NC}"
+    fi
     
     if [ $files_copied -gt 0 ]; then
         ((repaired_count++))
