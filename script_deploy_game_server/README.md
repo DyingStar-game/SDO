@@ -59,3 +59,9 @@ chmod +x create_servers.sh delete_servers.sh
 If the identifier is not valid:
 - Make sure it contains exactly 2 digits (e.g., 01, 12, 99)
 - Letters and special characters are not allowed
+
+---
+
+## 👨‍💻 Contributeur
+
+**Game Server Manager développé par [𝕭𝖗𝖚𝖒𝖊](https://noasecond.com)**
