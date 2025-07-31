@@ -8,11 +8,6 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Change to the parent directory (script_deploy_game_server)
-cd "$(dirname "$SCRIPT_DIR")"
-
 echo -e "${BLUE}========== Stop All Game Servers ==========${NC}"
 echo
 

@@ -2,16 +2,11 @@
 
 # Colors for better UX
 RED='\033[0;31m'
-GREEN='\033[        cd ..  # Return to parent directory;32m'
+GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
-
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Change to the parent directory (script_deploy_game_server)
-cd "$(dirname "$SCRIPT_DIR")"
 
 echo -e "${GREEN}========== Start All Game Servers ==========${NC}"
 echo
@@ -54,6 +49,8 @@ echo
 
 # Start each server
 started_count=0
+current_dir=$(pwd)
+
 for dir in "${server_dirs[@]}"; do
     if [ -f "$dir/StarDeception.dedicated_server.sh" ]; then
         echo -e "${BLUE}Starting server in $dir...${NC}"
@@ -63,7 +60,7 @@ for dir in "${server_dirs[@]}"; do
         server_pid=$!
         echo -e "${GREEN}  ✓ Server started with PID: $server_pid${NC}"
         ((started_count++))
-        cd ../scripts  # Return to scripts directory
+        cd "$current_dir"  # Return to original directory
         sleep 1  # Small delay between server starts
     else
         echo -e "${YELLOW}  ⚠ Warning: StarDeception.dedicated_server.sh not found in $dir${NC}"

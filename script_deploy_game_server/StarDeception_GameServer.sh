@@ -34,9 +34,10 @@ show_main_menu() {
     echo -e "${GREEN}2)${NC} Delete all servers"
     echo -e "${GREEN}3)${NC} Start all servers"
     echo -e "${BLUE}4)${NC} Stop all servers"
-    echo -e "${RED}5)${NC} Exit"
+    echo -e "${CYAN}5)${NC} Check servers status (soon)"
+    echo -e "${RED}6)${NC} Exit"
     echo
-    echo -n "Enter your choice [1-5]: "
+    echo -n "Enter your choice [1-6]: "
 }
 
 # Function to check and download the dedicated server binary
@@ -259,6 +260,28 @@ start_all_servers() {
     read -p "Press Enter to return to main menu..."
 }
 
+# Function to check server status
+check_servers_status() {
+    show_header
+    echo -e "${CYAN}=== Check Servers Status ===${NC}"
+    echo
+    
+    if [[ -f "./scripts/status_servers.sh" ]]; then
+        # Ensure script has execute permissions
+        chmod +x "./scripts/status_servers.sh"
+        echo -e "${BLUE}Launching server status check...${NC}"
+        echo
+        ./scripts/status_servers.sh
+    else
+        echo -e "${RED}✗ scripts/status_servers.sh not found${NC}"
+        read -p "Press Enter to return to main menu..."
+        return 1
+    fi
+    
+    echo
+    read -p "Press Enter to return to main menu..."
+}
+
 # Main program loop
 main() {
     while true; do
@@ -281,6 +304,9 @@ main() {
                 stop_all_servers
                 ;;
             5)
+                check_servers_status
+                ;;
+            6)
                 echo
                 echo -e "${CYAN}Thank you for using StarDeception Game Server Manager!${NC}"
                 echo -e "${CYAN}Goodbye!${NC}"
@@ -288,7 +314,7 @@ main() {
                 ;;
             *)
                 echo
-                echo -e "${RED}Invalid option. Please select 1-5.${NC}"
+                echo -e "${RED}Invalid option. Please select 1-6.${NC}"
                 sleep 2
                 ;;
         esac
