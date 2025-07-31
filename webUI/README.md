@@ -12,6 +12,11 @@ Une application web Node.js pour afficher les serveurs Star Deception sous forme
 
 ## Utilisation
 
+### Se déplacer dans WebUI :
+```bash
+cd ./WebUI
+```
+
 ### Démarrer le serveur de développement :
 ```bash
 npm run dev
