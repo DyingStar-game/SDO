@@ -4,14 +4,14 @@ Simple interactive script to manage StarDeception game servers.
 
 ## 🚀 Quick Start
 
-### 1. Set Permissions (Linux/WSL/macOS)
+### 1. Go in the right folder
 ```bash
-chmod +x *.sh scripts/*.sh
+cd ./SDO/script_deploy_game_server
 ```
 
 ### 2. Run the Manager
 ```bash
-./StarDeception_GameServer.sh
+sudo bash StarDeception_GameServer.sh
 ```
 
 ### 3. Follow the Menu
