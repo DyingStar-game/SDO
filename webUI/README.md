@@ -37,3 +37,9 @@ L'application récupère les données depuis :
 - **HTTP Client** : Axios
 - **Frontend** : HTML5, CSS3, JavaScript ES6
 - **Design** : CSS Grid, Flexbox, animations CSS
+
+---
+
+## 👨‍💻 Contributeur
+
+**WebUI développée par [𝕭𝖗𝖚𝖒𝖊](https://noasecond.com)**
