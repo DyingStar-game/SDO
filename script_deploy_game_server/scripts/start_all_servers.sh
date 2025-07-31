@@ -53,15 +53,20 @@ current_dir=$(pwd)
 
 for dir in "${server_dirs[@]}"; do
     if [ -f "$dir/StarDeception.dedicated_server.sh" ]; then
-        echo -e "${BLUE}Starting server in $dir...${NC}"
+        session_name="$(basename "$dir")_session"
+        echo -e "${BLUE}Starting server in $dir (screen: $session_name)...${NC}"
         cd "$dir"
         chmod +x StarDeception.dedicated_server.sh
-        nohup ./StarDeception.dedicated_server.sh > server.log 2>&1 &
-        server_pid=$!
-        echo -e "${GREEN}  ✓ Server started with PID: $server_pid${NC}"
-        ((started_count++))
-        cd "$current_dir"  # Return to original directory
-        sleep 1  # Small delay between server starts
+        # Démarre le serveur dans une session screen détachée
+        screen -dmS "$session_name" bash -c './StarDeception.dedicated_server.sh > server.log 2>&1'
+        if screen -list | grep -q "$session_name"; then
+            echo -e "${GREEN}  ✓ Server started in screen session: $session_name${NC}"
+            ((started_count++))
+        else
+            echo -e "${RED}  ✗ Failed to start server in screen session: $session_name${NC}"
+        fi
+        cd "$current_dir"
+        sleep 1
     else
         echo -e "${YELLOW}  ⚠ Warning: StarDeception.dedicated_server.sh not found in $dir${NC}"
     fi
@@ -72,8 +77,9 @@ if [ $started_count -gt 0 ]; then
     echo -e "${GREEN}✓ Successfully started $started_count server(s)!${NC}"
     echo -e "${BLUE}📋 Server management tips:${NC}"
     echo "  • Check individual server.log files in each server directory for output"
-    echo "  • To stop all servers: pkill -f StarDeception.dedicated_server"
-    echo "  • To check running servers: ps aux | grep StarDeception"
+    echo "  • To stop all servers: for s in $(screen -ls | grep '_session' | awk '{print $1}'); do screen -S \"$s\" -X quit; done"
+    echo "  • To check running servers: screen -ls | grep '_session'"
+    echo "  • To attach to a server: screen -r <session_name> (ex: screen -r server1_session)"
 else
     echo -e "${RED}✗ No servers were started${NC}"
 fi
