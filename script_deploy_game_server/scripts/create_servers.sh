@@ -39,6 +39,12 @@ check_and_download_binary() {
     if [[ -z "$download_url" || "$download_url" == *"????????????"* ]]; then
         echo -e "${RED}✗ No valid download URL found in link file${NC}"
         echo
+        echo -e "${BLUE}💡 Download URL Guidelines:${NC}"
+        echo "  • The URL must be a DIRECT download link to the binary file"
+        echo "  • It should end with the filename (e.g., .../StarDeception.dedicated_server.x86_64)"
+        echo "  • Avoid URLs that redirect to web pages or download pages"
+        echo "  • If using a file hosting service, use the 'direct download' or 'raw' URL"
+        echo
         echo "Please provide a valid download URL for the dedicated server binary:"
         read -p "Enter URL: " user_url
         
@@ -81,13 +87,15 @@ check_and_download_binary() {
     # Try wget first
     if command -v wget >/dev/null 2>&1; then
         echo -e "${BLUE}Using wget to download...${NC}"
-        if wget -O "$temp_file" "$download_url" 2>/dev/null; then
+        # Use wget with better options for direct downloads
+        if wget --no-check-certificate --content-disposition -O "$temp_file" "$download_url" 2>/dev/null; then
             download_success=true
         fi
     # Try curl if wget is not available
     elif command -v curl >/dev/null 2>&1; then
         echo -e "${BLUE}Using curl to download...${NC}"
-        if curl -L -o "$temp_file" "$download_url" 2>/dev/null; then
+        # Use curl with follow redirects and better headers
+        if curl -L -k -H "Accept: application/octet-stream" -o "$temp_file" "$download_url" 2>/dev/null; then
             download_success=true
         fi
     else
@@ -100,6 +108,36 @@ check_and_download_binary() {
         echo -e "${RED}✗ Download failed. Please check the URL and your internet connection.${NC}"
         read -p "Press Enter to continue..."
         return 1
+    fi
+    
+    # Check if the downloaded file is actually HTML (common issue with web hosting)
+    if file "$temp_file" | grep -q "HTML"; then
+        echo -e "${RED}✗ Downloaded file appears to be HTML instead of a binary.${NC}"
+        echo -e "${YELLOW}This usually means the URL points to a web page instead of the direct file.${NC}"
+        echo
+        echo -e "${BLUE}💡 Suggestions:${NC}"
+        echo "  • Make sure the URL is a direct download link"
+        echo "  • If using a file hosting service, get the direct download URL"
+        echo "  • Try right-clicking and 'Copy link address' on the download button"
+        echo
+        rm -f "$temp_file"
+        read -p "Press Enter to continue..."
+        return 1
+    fi
+    
+    # Check if the file is actually executable (has the right format)
+    if ! file "$temp_file" | grep -q "executable\|ELF"; then
+        echo -e "${YELLOW}⚠ Warning: Downloaded file doesn't appear to be an executable binary.${NC}"
+        echo -e "${BLUE}File type detected:${NC} $(file "$temp_file")"
+        echo
+        echo -e "${YELLOW}Do you want to continue anyway? [y/N]: ${NC}"
+        read -p "" continue_anyway
+        if [[ ! $continue_anyway =~ ^[Yy]$ ]]; then
+            rm -f "$temp_file"
+            echo -e "${YELLOW}Download cancelled.${NC}"
+            read -p "Press Enter to continue..."
+            return 1
+        fi
     fi
     
     # Move and rename the downloaded file
