@@ -29,12 +29,6 @@ npm start
 
 L'application sera accessible sur http://localhost:3000
 
-## API
-
-L'application récupère les données depuis :
-- **Source** : `http://sdo.stardeception.space/sdo/servers`
-- **Endpoint local** : `/api/servers` (proxy)
-
 ## Technologies utilisées
 
 - **Backend** : Node.js, Express

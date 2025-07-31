@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', async (req, res) => {
     try {
         // Récupérer les données des serveurs
-        const response = await axios.get('http://sdo.stardeception.space/sdo/servers');
+        const response = await axios.get('https://api.example.com/servers');
         const servers = response.data;
         
         res.render('index', { servers });
@@ -29,7 +29,7 @@ app.get('/', async (req, res) => {
 // Route API pour récupérer les serveurs (optionnel)
 app.get('/api/servers', async (req, res) => {
     try {
-        const response = await axios.get('http://sdo.stardeception.space/sdo/servers');
+        const response = await axios.get('https://api.example.com/servers');
         res.json(response.data);
     } catch (error) {
         console.error('Erreur API:', error.message);

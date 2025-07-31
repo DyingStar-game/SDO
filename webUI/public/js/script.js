@@ -1,6 +1,6 @@
 // Variables globales pour la configuration
 let refreshRate = 30; // secondes
-let dataUrl = 'http://sdo.stardeception.space/sdo/servers';
+let dataUrl = 'https://api.example.com/servers';
 let refreshInterval = null;
 let countdownInterval = null;
 let remainingTime = refreshRate;
