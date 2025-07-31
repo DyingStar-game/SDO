@@ -2,17 +2,22 @@
 
 # Colors for better UX
 RED='\033[0;31m'
-GREEN='\033[0;32m'
+GREEN='\033[        cd ..  # Return to parent directory;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Change to the parent directory (script_deploy_game_server)
+cd "$(dirname "$SCRIPT_DIR")"
+
 echo -e "${GREEN}========== Start All Game Servers ==========${NC}"
 echo
 
 # Check if dedicated server binary exists
-binary_file="../src/StarDeception.dedicated_server.x86_64"
+binary_file="./src/StarDeception.dedicated_server.x86_64"
 if [[ ! -f "$binary_file" ]]; then
     echo -e "${RED}✗ Dedicated server binary not found: $binary_file${NC}"
     echo -e "${YELLOW}Please make sure the binary is downloaded and placed in the src/ directory.${NC}"
@@ -23,7 +28,7 @@ fi
 echo -e "${GREEN}✓ Dedicated server binary found${NC}"
 
 # Find all server directories
-server_dirs=($(find .. -maxdepth 1 -type d -name "server*" | sort))
+server_dirs=($(find . -maxdepth 1 -type d -name "server*" | sort))
 
 if [ ${#server_dirs[@]} -eq 0 ]; then
     echo -e "${RED}No server directories found. Please run create_servers.sh first.${NC}"

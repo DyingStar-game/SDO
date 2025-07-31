@@ -8,9 +8,14 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Change to the parent directory (script_deploy_game_server)
+cd "$(dirname "$SCRIPT_DIR")"
+
 # Function to check and download binary
 check_and_download_binary() {
-    local src_dir="../src"
+    local src_dir="./src"
     local binary_file="$src_dir/StarDeception.dedicated_server.x86_64"
     local link_file="$src_dir/StarDeception.dedicated_server_link.txt"
     
@@ -154,8 +159,8 @@ SDO="${sdo_ip}"
 EOF
 
   # Copy the server files from src directory
-  cp "../src/StarDeception.dedicated_server.sh" "$folder/"
-  cp "../src/StarDeception.dedicated_server.x86_64" "$folder/"
+  cp "src/StarDeception.dedicated_server.sh" "$folder/"
+  cp "src/StarDeception.dedicated_server.x86_64" "$folder/"
 
   ((port++))
 done
