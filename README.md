@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 ### Guides rapides :
-- [⚙️ Foundry](script_deploy_game_server/README.md) - Gestionnaire de serveurs de jeu
+- [⚙️ Foundry](Foundry/README.md) - Gestionnaire de serveurs de jeu
 - [📡 Sentinel](Sentinel/README.md) - Interface web de monitoring
 
 ---
