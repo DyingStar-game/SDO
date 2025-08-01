@@ -12,7 +12,7 @@ script_deploy_game_server/src/StarDeception.dedicated_server.x86_64
 script_deploy_game_server/server*/
 
 # -----------------------------------------------------------------------------
-# WebUI / Node.js / JavaScript
+# Sentinel / Node.js / JavaScript
 # -----------------------------------------------------------------------------
 # Logs
 logs
