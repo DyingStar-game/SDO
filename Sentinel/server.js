@@ -124,14 +124,9 @@ app.use((error, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log('\n' + '='.repeat(60));
-    log.server(`${colors.bright}Star Deception WebUI - Sentinel${colors.reset}`);
+    log.server(`${colors.bright}Star Deception - Sentinel${colors.reset}`);
     console.log('='.repeat(60));
     log.success(`Serveur démarré avec succès !`);
-    log.api(`URL d'accès: ${colors.bright}${colors.cyan}http://localhost:${PORT}${colors.reset}`);
     log.config(`Port configuré: ${colors.bright}${PORT}${colors.reset}`);
-    console.log('\n' + colors.yellow + '💡 Conseils de démarrage:' + colors.reset);
-    console.log(`   ${colors.cyan}•${colors.reset} Ligne de commande: ${colors.bright}node server.js --port=XXXX${colors.reset}`);
-    console.log(`   ${colors.cyan}•${colors.reset} Variable d'env: ${colors.bright}$env:PORT=XXXX; node server.js${colors.reset}`);
-    console.log(`   ${colors.cyan}•${colors.reset} Scripts npm: ${colors.bright}npm run start:8080|5000|4000${colors.reset}`);
-    console.log('\n' + colors.green + '🎯 Serveur prêt à recevoir des requêtes !' + colors.reset + '\n');
+    log.api(`URL d'accès: ${colors.bright}${colors.cyan}http://localhost:${PORT}${colors.reset}`);
 });
