@@ -11,8 +11,8 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}========== Stop All Game Servers ==========${NC}"
 echo
 
-# Check for running StarDeception servers
-running_servers=$(ps aux | grep -v grep | grep "StarDeception.dedicated_server" | wc -l)
+# Check for running StarDeception servers in screen sessions
+running_servers=$(screen -ls | grep "_session" | wc -l)
 
 if [ $running_servers -eq 0 ]; then
     echo -e "${YELLOW}No StarDeception servers are currently running.${NC}"
@@ -22,9 +22,9 @@ fi
 echo -e "${BLUE}Found $running_servers running StarDeception server(s)${NC}"
 echo
 
-# Show running processes
+# Show running screen sessions
 echo -e "${BLUE}Currently running servers:${NC}"
-ps aux | grep -v grep | grep "StarDeception.dedicated_server" | while read line; do
+screen -ls | grep "_session" | while read line; do
     echo "  $line"
 done
 echo
@@ -40,23 +40,38 @@ fi
 
 echo -e "${BLUE}Stopping all StarDeception servers...${NC}"
 
-# Stop the servers
-pkill -f "StarDeception.dedicated_server"
+# Stop the servers by terminating screen sessions
+stopped_count=0
+screen_sessions=($(screen -ls | grep "_session" | awk '{print $1}'))
+
+for session in "${screen_sessions[@]}"; do
+    echo -e "  Stopping session: $session"
+    screen -S "$session" -X quit
+    ((stopped_count++))
+done
 
 # Wait a moment for graceful shutdown
 sleep 2
 
 # Check if any servers are still running
-remaining_servers=$(ps aux | grep -v grep | grep "StarDeception.dedicated_server" | wc -l)
+remaining_servers=$(screen -ls | grep "_session" | wc -l)
 
 if [ $remaining_servers -eq 0 ]; then
-    echo -e "${GREEN}✓ All StarDeception servers have been stopped successfully.${NC}"
+    echo -e "${GREEN}✓ All StarDeception servers (${stopped_count}) have been stopped successfully.${NC}"
 else
-    echo -e "${YELLOW}⚠ Some servers may still be running. Attempting force kill...${NC}"
-    pkill -9 -f "StarDeception.dedicated_server"
+    echo -e "${YELLOW}⚠ Some servers are still running. Attempting forceful termination...${NC}"
+    # Get any remaining session names
+    remaining_sessions=$(screen -ls | grep "_session" | awk '{print $1}')
+    
+    # Forcefully terminate any remaining sessions
+    for session in $remaining_sessions; do
+        echo -e "  Force stopping session: $session"
+        screen -S "$session" -X quit
+    done
+    
     sleep 1
     
-    final_check=$(ps aux | grep -v grep | grep "StarDeception.dedicated_server" | wc -l)
+    final_check=$(screen -ls | grep "_session" | wc -l)
     if [ $final_check -eq 0 ]; then
         echo -e "${GREEN}✓ All servers have been forcefully stopped.${NC}"
     else
@@ -68,4 +83,5 @@ echo
 echo -e "${BLUE}📋 Server management tips:${NC}"
 echo "  • Check server.log files in each server directory for shutdown logs"
 echo "  • To start servers again: ./StarDeception_GameServer.sh"
-echo "  • To check for any remaining processes: ps aux | grep StarDeception"
+echo "  • To check for any remaining screen sessions: screen -ls | grep '_session'"
+echo "  • To manually terminate a screen session: screen -S <session_name> -X quit"

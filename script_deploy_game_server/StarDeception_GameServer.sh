@@ -35,9 +35,10 @@ show_main_menu() {
     echo -e "${GREEN}3)${NC} Start all servers"
     echo -e "${BLUE}4)${NC} Stop all servers"
     echo -e "${CYAN}5)${NC} Check servers status (soon)"
-    echo -e "${RED}6)${NC} Exit"
+    echo -e "${MAGENTA}6)${NC} Docker servers"
+    echo -e "${RED}7)${NC} Exit"
     echo
-    echo -n "Enter your choice [1-6]: "
+    echo -n "Enter your choice [1-7]: "
 }
 
 # Function to check and download the dedicated server binary
@@ -282,6 +283,33 @@ check_servers_status() {
     read -p "Press Enter to return to main menu..."
 }
 
+# Function to handle Docker operations
+docker_servers() {
+    show_header
+    echo -e "${MAGENTA}=== Docker Servers ===${NC}"
+    echo
+    
+    # First check and download the binary if needed
+    if ! check_and_download_binary; then
+        return 1
+    fi
+    
+    if [[ -f "./scripts/docker_server.sh" ]]; then
+        # Ensure script has execute permissions
+        chmod +x "./scripts/docker_server.sh"
+        echo -e "${BLUE}Launching Docker server script...${NC}"
+        echo
+        ./scripts/docker_server.sh
+    else
+        echo -e "${RED}✗ scripts/docker_server.sh not found${NC}"
+        read -p "Press Enter to return to main menu..."
+        return 1
+    fi
+    
+    echo
+    read -p "Press Enter to return to main menu..."
+}
+
 # Main program loop
 main() {
     while true; do
@@ -307,6 +335,9 @@ main() {
                 check_servers_status
                 ;;
             6)
+                docker_servers
+                ;;
+            7)
                 echo
                 echo -e "${CYAN}Thank you for using StarDeception Game Server Manager!${NC}"
                 echo -e "${CYAN}Goodbye!${NC}"
@@ -314,7 +345,7 @@ main() {
                 ;;
             *)
                 echo
-                echo -e "${RED}Invalid option. Please select 1-6.${NC}"
+                echo -e "${RED}Invalid option. Please select 1-7.${NC}"
                 sleep 2
                 ;;
         esac
@@ -327,6 +358,13 @@ if [[ ! -f "./scripts/create_servers.sh" ]] || [[ ! -f "./scripts/delete_servers
     echo "Please make sure you're running this script from the script_deploy_game_server directory"
     echo "and that scripts/create_servers.sh, scripts/delete_servers.sh, and scripts/start_all_servers.sh exist."
     exit 1
+fi
+
+# Create docker_server.sh if it doesn't exist (compatibility with older versions)
+if [[ ! -f "./scripts/docker_server.sh" ]]; then
+    echo -e "${YELLOW}⚠ docker_server.sh not found, creating it...${NC}"
+    curl -s https://raw.githubusercontent.com/StarDeception/SDO/feat/start_server_screen/script_deploy_game_server/scripts/docker_server.sh > ./scripts/docker_server.sh
+    chmod +x ./scripts/docker_server.sh
 fi
 
 # Start the main program

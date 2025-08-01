@@ -11,6 +11,9 @@ script_deploy_game_server/src/StarDeception.dedicated_server.x86_64
 # Dossiers de serveurs générés
 script_deploy_game_server/server*/
 
+# Dockerfile pour le serveur dédié
+script_deploy_game_server/Dockerfile
+
 # -----------------------------------------------------------------------------
 # Sentinel / Node.js / JavaScript
 # -----------------------------------------------------------------------------
