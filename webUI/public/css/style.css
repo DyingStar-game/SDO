@@ -433,6 +433,21 @@ footer p {
     color: #888;
     font-size: 0.9rem;
     font-weight: 300;
+    margin: 0.3rem 0;
+}
+
+footer a {
+    color: #00d4aa;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+footer a:hover {
+    color: #00a3ff;
+    transform: translateY(-1px);
 }
 
 /* Responsive */
