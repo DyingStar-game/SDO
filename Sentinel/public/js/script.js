@@ -104,6 +104,23 @@ function hideLoader() {
     }
 }
 
+// Fonctions de gestion du compteur de refresh
+function showCountdownContainer() {
+    const countdownContainer = document.getElementById('countdownContainer');
+    if (countdownContainer) {
+        countdownContainer.style.display = 'block';
+        log.info('⏱️ Compteur de refresh affiché');
+    }
+}
+
+function hideCountdownContainer() {
+    const countdownContainer = document.getElementById('countdownContainer');
+    if (countdownContainer) {
+        countdownContainer.style.display = 'none';
+        log.info('⏱️ Compteur de refresh masqué');
+    }
+}
+
 // Fonction principale d'actualisation des données
 function refreshData() {
     if (currentViewMode === 'servers') {
@@ -415,6 +432,16 @@ function startRefreshInterval() {
     if (refreshInterval) clearInterval(refreshInterval);
     if (countdownInterval) clearInterval(countdownInterval);
     
+    // Vérifier si une URL est configurée
+    if (!baseUrl || baseUrl.trim() === '') {
+        hideCountdownContainer();
+        log.warning('⚠️ Pas d\'URL configurée - Intervalles de refresh non démarrés');
+        return;
+    }
+    
+    // Afficher le compteur de refresh
+    showCountdownContainer();
+    
     // Démarrer les nouveaux intervalles
     refreshInterval = setInterval(refreshData, refreshRate * 1000);
     
@@ -427,6 +454,20 @@ function startRefreshInterval() {
             remainingTime = refreshRate;
         }
     }, 1000);
+}
+
+// Fonction pour arrêter les intervalles de refresh
+function stopRefreshInterval() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    hideCountdownContainer();
+    log.info('🛑 Intervalles de refresh arrêtés');
 }
 
 // Mise à jour du compteur visuel
@@ -620,16 +661,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentViewMode
             });
             
-            // Afficher le loader avant de déclencher le refresh
+            remainingTime = refreshRate;
+            
+            // Si une URL est configurée, démarrer le refresh et afficher le loader
             if (baseUrl.trim() !== '') {
                 showLoader();
+                startRefreshInterval();
+                refreshData();
+                showSuccess('Paramètres appliqués avec succès !');
+            } else {
+                // Si pas d'URL, arrêter les intervalles et masquer le compteur
+                stopRefreshInterval();
+                showSuccess('Paramètres sauvegardés. Ajoutez une URL pour activer le refresh automatique.');
             }
-            
-            remainingTime = refreshRate;
-            startRefreshInterval();
-            refreshData();
-            
-            showSuccess('Paramètres appliqués avec succès !');
         });
     }
     
@@ -638,6 +682,10 @@ document.addEventListener('DOMContentLoaded', function() {
         startRefreshInterval();
         // Première actualisation
         refreshData();
+    } else {
+        // S'assurer que le compteur est masqué au démarrage si pas d'URL
+        hideCountdownContainer();
+        log.info('💡 Aucune URL configurée - Veuillez entrer une URL et cliquer sur Appliquer');
     }
 });
 

@@ -159,6 +159,7 @@ header p {
 }
 
 .countdown-progress {
+    margin-top: 5px;
     width: 100%;
     height: 4px;
     background: rgba(0, 212, 170, 0.2);
