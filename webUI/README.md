@@ -1,4 +1,8 @@
-# Star Deception Servers WebApp
+# Star Deception - Sentinel
+
+<div align="center">
+  <img src="public/Logo.png" alt="StarDeception Logo" width="150" height="150">
+</div>
 
 Une application web Node.js pour afficher les serveurs Star Deception sous forme de cartes dans une grille.
 
