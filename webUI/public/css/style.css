@@ -257,6 +257,13 @@ header p {
     font-weight: 400;
 }
 
+/* Grid */
+main.container {
+    max-width: none;
+    margin: 0 5vw;
+    padding: 0 20px;
+}
+    
 /* Servers Grid */
 .servers-grid {
     display: grid;
@@ -679,10 +686,6 @@ footer p {
 .view-players .players-grid,
 .view-players .players-stats {
     display: grid !important;
-}
-
-.view-players .players-stats {
-    display: flex !important;
 }
 
 /* Layout Modes - Grille et Liste */
