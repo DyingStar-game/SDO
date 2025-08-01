@@ -87,6 +87,23 @@ function getPlayersUrl() {
     return buildUrl('players');
 }
 
+// Fonctions de gestion du loader
+function showLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'flex';
+        log.info('🔄 Loader affiché');
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'none';
+        log.info('✅ Loader masqué');
+    }
+}
+
 // Fonction principale d'actualisation des données
 function refreshData() {
     if (currentViewMode === 'servers') {
@@ -104,6 +121,7 @@ function refreshServers() {
     if (!serversUrl || serversUrl.trim() === '') {
         log.warning('URL de base non configurée, actualisation des serveurs ignorée');
         showError('Veuillez configurer l\'URL de base avant l\'actualisation');
+        hideLoader();
         return;
     }
     
@@ -132,6 +150,9 @@ function refreshServers() {
         .catch(error => {
             log.error(`Erreur lors de l'actualisation des serveurs: ${error.message}`);
             showError(`Erreur serveurs: ${error.message}`);
+        })
+        .finally(() => {
+            hideLoader();
         });
 }
 
@@ -143,6 +164,7 @@ function refreshPlayers() {
     if (!playersUrl || playersUrl.trim() === '') {
         log.warning('URL de base non configurée, actualisation des joueurs ignorée');
         showError('Veuillez configurer l\'URL de base avant l\'actualisation');
+        hideLoader();
         return;
     }
     
@@ -171,6 +193,9 @@ function refreshPlayers() {
         .catch(error => {
             log.error(`Erreur lors de l'actualisation des joueurs: ${error.message}`);
             showError(`Erreur joueurs: ${error.message}`);
+        })
+        .finally(() => {
+            hideLoader();
         });
 }
 
@@ -594,6 +619,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 playersUrl: getPlayersUrl(),
                 currentViewMode
             });
+            
+            // Afficher le loader avant de déclencher le refresh
+            if (baseUrl.trim() !== '') {
+                showLoader();
+            }
             
             remainingTime = refreshRate;
             startRefreshInterval();
