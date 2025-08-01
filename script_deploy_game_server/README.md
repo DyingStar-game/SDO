@@ -20,6 +20,7 @@ The script provides an interactive menu with these options:
 - **Delete all servers** - Remove all server directories
 - **Start all servers** - Launch configured servers (auto-downloads binary)
 - **Stop all servers** - Stop running servers
+- **Docker servers** - Build and run servers as Docker containers
 - **Exit** - Close the application
 
 ## � First Time Setup
