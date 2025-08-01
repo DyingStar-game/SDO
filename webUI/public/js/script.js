@@ -1,15 +1,115 @@
+// Système de logs colorés pour le navigateur
+const log = {
+    info: (msg, ...args) => console.log(`%cℹ️ ${msg}`, 'color: #17a2b8; font-weight: bold;', ...args),
+    success: (msg, ...args) => console.log(`%c✅ ${msg}`, 'color: #28a745; font-weight: bold;', ...args),
+    warning: (msg, ...args) => console.log(`%c⚠️ ${msg}`, 'color: #ffc107; font-weight: bold;', ...args),
+    error: (msg, ...args) => console.log(`%c❌ ${msg}`, 'color: #dc3545; font-weight: bold;', ...args),
+    api: (msg, ...args) => console.log(`%c📡 ${msg}`, 'color: #007bff; font-weight: bold;', ...args),
+    config: (msg, ...args) => console.log(`%c⚙️ ${msg}`, 'color: #6f42c1; font-weight: bold;', ...args),
+    data: (msg, ...args) => console.log(`%c📊 ${msg}`, 'color: #fd7e14; font-weight: bold;', ...args)
+};
+
 // Variables globales pour la configuration
 let refreshRate = 30; // secondes
-let dataUrl = 'https://api.example.com/servers';
+let baseUrl = ''; // URL de base vide par défaut, à configurer par l'utilisateur
 let refreshInterval = null;
 let countdownInterval = null;
 let remainingTime = refreshRate;
+let currentViewMode = 'servers'; // 'servers' ou 'players'
+let currentLayoutMode = 'grid'; // 'grid' ou 'list'
+
+// Fonction pour détecter le type d'appareil
+function detectDevice() {
+    const width = window.innerWidth;
+    if (width <= 768) {
+        return 'mobile';
+    } else if (width <= 1024) {
+        return 'tablet';
+    } else {
+        return 'desktop';
+    }
+}
+
+// Fonction pour définir le layout par défaut selon l'appareil
+function setDefaultLayout() {
+    const device = detectDevice();
+    if (device === 'mobile') {
+        currentLayoutMode = 'list';
+        log.config(`📱 Appareil mobile détecté - Layout: liste`);
+    } else {
+        currentLayoutMode = 'grid';
+        log.config(`🖥️ Appareil ${device} détecté - Layout: grille`);
+    }
+    applyLayoutMode();
+}
+
+// Fonction pour appliquer le mode d'affichage
+function applyLayoutMode() {
+    const body = document.body;
+    const layoutToggle = document.getElementById('layoutToggle');
+    
+    if (currentLayoutMode === 'list') {
+        body.classList.add('layout-list');
+        body.classList.remove('layout-grid');
+        if (layoutToggle) layoutToggle.checked = true;
+    } else {
+        body.classList.add('layout-grid');
+        body.classList.remove('layout-list');
+        if (layoutToggle) layoutToggle.checked = false;
+    }
+    
+    log.info(`🔄 Layout changé vers: ${currentLayoutMode === 'grid' ? 'Grille' : 'Liste'}`);
+}
+
+// Fonction pour construire les URLs dynamiquement
+function buildUrl(endpoint) {
+    if (!baseUrl || baseUrl.trim() === '') {
+        return '';
+    }
+    
+    // Nettoyer l'URL de base (enlever le slash final s'il existe)
+    let cleanBaseUrl = baseUrl.trim();
+    if (cleanBaseUrl.endsWith('/')) {
+        cleanBaseUrl = cleanBaseUrl.slice(0, -1);
+    }
+    
+    // Construire l'URL complète
+    return `${cleanBaseUrl}/sdo/${endpoint}`;
+}
+
+// Fonction pour obtenir l'URL des serveurs
+function getServersUrl() {
+    return buildUrl('servers');
+}
+
+// Fonction pour obtenir l'URL des joueurs
+function getPlayersUrl() {
+    return buildUrl('players');
+}
 
 // Fonction principale d'actualisation des données
 function refreshData() {
-    console.log(`Actualisation des données depuis: ${dataUrl}`);
+    if (currentViewMode === 'servers') {
+        refreshServers();
+    } else {
+        refreshPlayers();
+    }
+}
+
+// Actualisation des serveurs
+function refreshServers() {
+    const serversUrl = getServersUrl();
     
-    fetch(dataUrl)
+    // Vérifier si l'URL est configurée
+    if (!serversUrl || serversUrl.trim() === '') {
+        log.warning('URL de base non configurée, actualisation des serveurs ignorée');
+        showError('Veuillez configurer l\'URL de base avant l\'actualisation');
+        return;
+    }
+    
+    log.api(`Actualisation des serveurs depuis: ${serversUrl}`);
+    
+    fetch(serversUrl)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -17,10 +117,10 @@ function refreshData() {
             return response.json();
         })
         .then(data => {
-            console.log('Données actualisées:', data.length, 'serveurs');
+            log.success(`Données serveurs actualisées: ${data.length} serveurs`);
             
             // Mise à jour dynamique des stats
-            updateStats(data);
+            updateServerStats(data);
             
             // Mise à jour des cartes serveurs
             updateServerCards(data);
@@ -30,19 +130,60 @@ function refreshData() {
             
         })
         .catch(error => {
-            console.error('Erreur lors de l\'actualisation:', error);
-            showError(`Erreur: ${error.message}`);
+            log.error(`Erreur lors de l'actualisation des serveurs: ${error.message}`);
+            showError(`Erreur serveurs: ${error.message}`);
         });
 }
 
-// Mise à jour des statistiques
-function updateStats(servers) {
+// Actualisation des joueurs
+function refreshPlayers() {
+    const playersUrl = getPlayersUrl();
+    
+    // Vérifier si l'URL est configurée
+    if (!playersUrl || playersUrl.trim() === '') {
+        log.warning('URL de base non configurée, actualisation des joueurs ignorée');
+        showError('Veuillez configurer l\'URL de base avant l\'actualisation');
+        return;
+    }
+    
+    log.api(`Actualisation des joueurs depuis: ${playersUrl}`);
+    
+    fetch(playersUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            log.success(`Données joueurs actualisées: ${data.length} joueurs`);
+            
+            // Mise à jour dynamique des stats
+            updatePlayerStats(data);
+            
+            // Mise à jour des cartes joueurs
+            updatePlayerCards(data);
+            
+            // Réinitialiser le compte à rebours
+            remainingTime = refreshRate;
+            
+        })
+        .catch(error => {
+            log.error(`Erreur lors de l'actualisation des joueurs: ${error.message}`);
+            showError(`Erreur joueurs: ${error.message}`);
+        });
+}
+
+// Mise à jour des statistiques des serveurs
+function updateServerStats(servers) {
     const totalServers = servers.length;
     const freeServers = servers.filter(s => s.is_free === 1).length;
     const occupiedServers = servers.filter(s => s.is_free === 0).length;
     
-    // Mettre à jour les éléments de stats s'ils existent
-    const statCards = document.querySelectorAll('.stat-card h3');
+    log.data(`📈 Stats serveurs: ${totalServers} total | ${freeServers} libres | ${occupiedServers} occupés`);
+    
+    // Mettre à jour les éléments de stats serveurs
+    const statCards = document.querySelectorAll('.servers-stats .stat-card h3');
     if (statCards.length >= 3) {
         statCards[0].textContent = totalServers;
         statCards[1].textContent = freeServers;
@@ -50,29 +191,56 @@ function updateStats(servers) {
     }
 }
 
+// Mise à jour des statistiques des joueurs
+function updatePlayerStats(players) {
+    const totalPlayers = players.length;
+    const uniqueServers = [...new Set(players.map(p => p.server_id))].length;
+    const recentlyUpdated = players.filter(p => {
+        const updatedAt = new Date(p.updated_at);
+        const now = new Date();
+        const timeDiff = now - updatedAt;
+        return timeDiff < 5 * 60 * 1000; // Actif dans les 5 dernières minutes
+    }).length;
+    
+    log.data(`📈 Stats joueurs: ${totalPlayers} total | ${uniqueServers} serveurs uniques | ${recentlyUpdated} récemment actifs`);
+    
+    // Mettre à jour les éléments de stats joueurs
+    document.getElementById('totalPlayers').textContent = totalPlayers;
+    document.getElementById('uniqueServers').textContent = uniqueServers;
+    document.getElementById('recentlyUpdated').textContent = recentlyUpdated;
+}
+
 // Mise à jour des cartes serveurs
 function updateServerCards(servers) {
     const serversGrid = document.querySelector('.servers-grid');
     if (!serversGrid) return;
     
-    // Nettoyer la grille actuelle
     serversGrid.innerHTML = '';
     
-    // Recréer les cartes
-    servers.forEach((server, index) => {
+    servers.forEach(server => {
         const serverCard = createServerCard(server);
         serversGrid.appendChild(serverCard);
-        
-        // Animation d'apparition
-        setTimeout(() => {
-            serverCard.style.opacity = '1';
-            serverCard.style.transform = 'translateY(0)';
-        }, index * 50);
     });
     
-    // Afficher message si aucun serveur
     if (servers.length === 0) {
         serversGrid.innerHTML = '<div class="no-servers"><p>🔍 Aucun serveur trouvé</p></div>';
+    }
+}
+
+// Mise à jour des cartes joueurs
+function updatePlayerCards(players) {
+    const playersGrid = document.querySelector('.players-grid');
+    if (!playersGrid) return;
+    
+    playersGrid.innerHTML = '';
+    
+    players.forEach(player => {
+        const playerCard = createPlayerCard(player);
+        playersGrid.appendChild(playerCard);
+    });
+    
+    if (players.length === 0) {
+        playersGrid.innerHTML = '<div class="no-servers"><p>🔍 Aucun joueur trouvé</p></div>';
     }
 }
 
@@ -80,29 +248,6 @@ function updateServerCards(servers) {
 function createServerCard(server) {
     const card = document.createElement('div');
     card.className = `server-card ${server.is_free === 1 ? 'free' : 'occupied'}`;
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = 'all 0.5s ease';
-    
-    const coordinatesHtml = server.coordinate_x_start !== null ? `
-        <div class="info-row">
-            <span class="label">📍 Coordonnées X:</span>
-            <span class="value">${server.coordinate_x_start} → ${server.coordinate_x_end}</span>
-        </div>
-        <div class="info-row">
-            <span class="label">📍 Coordonnées Y:</span>
-            <span class="value">${server.coordinate_y_start} → ${server.coordinate_y_end}</span>
-        </div>
-        <div class="info-row">
-            <span class="label">📍 Coordonnées Z:</span>
-            <span class="value">${server.coordinate_z_start} → ${server.coordinate_z_end}</span>
-        </div>
-    ` : `
-        <div class="info-row">
-            <span class="label">📍 Coordonnées:</span>
-            <span class="value">Non définies</span>
-        </div>
-    `;
     
     card.innerHTML = `
         <div class="server-header">
@@ -123,7 +268,27 @@ function createServerCard(server) {
                 <span class="value">${server.current_players}/${server.max_players}</span>
             </div>
             
-            ${coordinatesHtml}
+            ${server.coordinate_x_start !== null ? `
+                <div class="info-row">
+                    <span class="label">📍 Coordonnées X:</span>
+                    <span class="value">${server.coordinate_x_start} → ${server.coordinate_x_end}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="label">📍 Coordonnées Y:</span>
+                    <span class="value">${server.coordinate_y_start} → ${server.coordinate_y_end}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="label">📍 Coordonnées Z:</span>
+                    <span class="value">${server.coordinate_z_start} → ${server.coordinate_z_end}</span>
+                </div>
+            ` : `
+                <div class="info-row">
+                    <span class="label">📍 Coordonnées:</span>
+                    <span class="value">Non définies</span>
+                </div>
+            `}
             
             <div class="info-row">
                 <span class="label">🕐 Créé le:</span>
@@ -140,238 +305,329 @@ function createServerCard(server) {
     return card;
 }
 
-// Démarrer le système de refresh
-function startRefreshSystem() {
-    // Arrêter les intervals existants
-    if (refreshInterval) clearInterval(refreshInterval);
-    if (countdownInterval) clearInterval(countdownInterval);
+// Créer une carte joueur
+function createPlayerCard(player) {
+    const card = document.createElement('div');
+    card.className = 'player-card';
     
-    // Refresh principal
-    refreshInterval = setInterval(refreshData, refreshRate * 1000);
+    card.innerHTML = `
+        <div class="player-header">
+            <h3>${player.name}</h3>
+            <span class="player-id">ID: ${player.id}</span>
+        </div>
+        
+        <div class="player-info">
+            <div class="info-row">
+                <span class="label">🆔 Client ID:</span>
+                <span class="value">${player.client_id}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="label">🖥️ Serveur:</span>
+                <span class="value server-badge">Serveur ${player.server_id}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="label">📍 Position:</span>
+                <span class="value coordinates-badge">X: ${player.x}, Y: ${player.y}, Z: ${player.z}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="label">🕐 Créé le:</span>
+                <span class="value">${new Date(player.created_at).toLocaleString('fr-FR')}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="label">🔄 Mis à jour:</span>
+                <span class="value">${new Date(player.updated_at).toLocaleString('fr-FR')}</span>
+            </div>
+        </div>
+    `;
     
-    // Compte à rebours
-    remainingTime = refreshRate;
-    countdownInterval = setInterval(updateCountdown, 1000);
-    
-    console.log(`Système de refresh démarré: ${refreshRate}s`);
+    return card;
 }
 
-// Mettre à jour le compte à rebours
-function updateCountdown() {
-    remainingTime--;
+// Basculer entre les vues
+function toggleView() {
+    const body = document.body;
+    const toggle = document.getElementById('viewToggle');
     
-    const countdownTimeElement = document.getElementById('countdownTime');
-    const countdownBarElement = document.getElementById('countdownBar');
-    const countdownDisplayElement = document.querySelector('.countdown-display');
-    
-    if (countdownTimeElement) {
-        countdownTimeElement.textContent = remainingTime;
+    if (toggle.checked) {
+        currentViewMode = 'players';
+        body.className = 'view-players';
+        log.info('🔄 Basculement vers la vue Joueurs');
+        refreshPlayers();
+    } else {
+        currentViewMode = 'servers';
+        body.className = 'view-servers';
+        log.info('🔄 Basculement vers la vue Serveurs');
+        refreshServers();
     }
     
-    // Mettre à jour la barre de progression
-    if (countdownBarElement) {
-        const progressPercentage = (remainingTime / refreshRate) * 100;
-        countdownBarElement.style.width = `${progressPercentage}%`;
-    }
-    
-    // Animation d'alerte quand il reste moins de 5 secondes
-    if (countdownDisplayElement) {
-        if (remainingTime <= 5 && remainingTime > 0) {
-            countdownDisplayElement.classList.add('warning');
-        } else {
-            countdownDisplayElement.classList.remove('warning');
-        }
-    }
-    
-    if (remainingTime <= 0) {
-        remainingTime = refreshRate;
-        // Reset la barre de progression
-        if (countdownBarElement) {
-            countdownBarElement.style.width = '100%';
-        }
-        if (countdownDisplayElement) {
-            countdownDisplayElement.classList.remove('warning');
-        }
-    }
-}
-
-// Appliquer les nouveaux paramètres
-function applySettings() {
-    const newRefreshRate = parseInt(document.getElementById('refreshRate').value);
-    const newDataUrl = document.getElementById('dataUrl').value.trim();
-    
-    // Validation
-    if (newRefreshRate < 5 || newRefreshRate > 300) {
-        showError('Le refresh rate doit être entre 5 et 300 secondes');
-        return;
-    }
-    
-    if (!newDataUrl) {
-        showError('L\'URL des données ne peut pas être vide');
-        return;
-    }
-    
-    // Appliquer les changements
-    refreshRate = newRefreshRate;
-    dataUrl = newDataUrl;
+    // Réappliquer le layout mode
+    applyLayoutMode();
     
     // Réinitialiser le compteur
     remainingTime = refreshRate;
-    updateCountdownDisplay();
-    
-    // Redémarrer le système
-    startRefreshSystem();
-    
-    // Refresh immédiat
-    refreshData();
-    
-    // Sauvegarder dans localStorage
-    localStorage.setItem('refreshRate', refreshRate);
-    localStorage.setItem('dataUrl', dataUrl);
-    
-    showSuccess(`Paramètres appliqués: Refresh ${refreshRate}s`);
 }
 
-// Afficher une erreur
+// Basculer entre grille et liste
+function toggleLayout() {
+    const toggle = document.getElementById('layoutToggle');
+    
+    if (toggle.checked) {
+        currentLayoutMode = 'list';
+    } else {
+        currentLayoutMode = 'grid';
+    }
+    
+    applyLayoutMode();
+}
+
+// Fonction pour démarrer les intervalles
+function startRefreshInterval() {
+    // Arrêter les intervalles existants
+    if (refreshInterval) clearInterval(refreshInterval);
+    if (countdownInterval) clearInterval(countdownInterval);
+    
+    // Démarrer les nouveaux intervalles
+    refreshInterval = setInterval(refreshData, refreshRate * 1000);
+    
+    // Compteur visuel
+    countdownInterval = setInterval(() => {
+        remainingTime--;
+        updateCountdown();
+        
+        if (remainingTime <= 0) {
+            remainingTime = refreshRate;
+        }
+    }, 1000);
+}
+
+// Mise à jour du compteur visuel
+function updateCountdown() {
+    const countdownTime = document.getElementById('countdownTime');
+    const countdownBar = document.getElementById('countdownBar');
+    
+    if (countdownTime) {
+        countdownTime.textContent = remainingTime;
+    }
+    
+    if (countdownBar) {
+        const percentage = ((refreshRate - remainingTime) / refreshRate) * 100;
+        countdownBar.style.width = percentage + '%';
+    }
+}
+
+// Fonction pour afficher les erreurs
 function showError(message) {
-    showToast(message, 'error');
-}
-
-// Afficher un succès
-function showSuccess(message) {
-    showToast(message, 'success');
-}
-
-// Afficher un toast
-function showToast(message, type = 'info') {
+    // Créer un élément toast pour l'erreur
     const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.className = `toast toast-${type}`;
-    
-    const colors = {
-        success: '#00d4aa',
-        error: '#ff6b6b',
-        info: '#00a3ff'
-    };
-    
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${colors[type]};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        z-index: 1000;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        animation: slideInToast 0.3s ease;
-        max-width: 300px;
+    toast.className = 'error-toast';
+    toast.innerHTML = `
+        <div class="toast-content">
+            <span class="toast-icon">⚠️</span>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
     `;
+    
+    // Ajouter les styles si pas déjà fait
+    if (!document.querySelector('#error-toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'error-toast-styles';
+        style.textContent = `
+            .error-toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(220, 53, 69, 0.95);
+                color: white;
+                padding: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideInToast 0.3s ease;
+                max-width: 400px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(220, 53, 69, 0.3);
+            }
+            
+            .toast-content {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+            }
+            
+            .toast-icon {
+                font-size: 1.2rem;
+            }
+            
+            .toast-message {
+                flex: 1;
+                font-size: 0.9rem;
+            }
+            
+            .toast-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 0;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            @keyframes slideInToast {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
     
     document.body.appendChild(toast);
     
+    // Supprimer automatiquement après 5 secondes
     setTimeout(() => {
-        toast.style.animation = 'slideOutToast 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 5000);
 }
 
-// Charger les paramètres sauvegardés
-function loadSavedSettings() {
-    const savedRefreshRate = localStorage.getItem('refreshRate');
-    const savedDataUrl = localStorage.getItem('dataUrl');
+// Fonction pour afficher les messages de succès
+function showSuccess(message) {
+    const toast = document.createElement('div');
+    toast.className = 'success-toast';
+    toast.innerHTML = `
+        <div class="toast-content">
+            <span class="toast-icon">✅</span>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
     
-    if (savedRefreshRate) {
-        refreshRate = parseInt(savedRefreshRate);
-        document.getElementById('refreshRate').value = refreshRate;
+    // Ajouter les styles pour le toast de succès
+    if (!document.querySelector('#success-toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'success-toast-styles';
+        style.textContent = `
+            .success-toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(40, 167, 69, 0.95);
+                color: white;
+                padding: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideInToast 0.3s ease;
+                max-width: 400px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(40, 167, 69, 0.3);
+            }
+        `;
+        document.head.appendChild(style);
     }
     
-    if (savedDataUrl) {
-        dataUrl = savedDataUrl;
-        document.getElementById('dataUrl').value = dataUrl;
-    }
+    document.body.appendChild(toast);
     
-    // Initialiser le compteur
-    remainingTime = refreshRate;
-    updateCountdownDisplay();
-}
-
-// Mettre à jour l'affichage du compteur
-function updateCountdownDisplay() {
-    const countdownTimeElement = document.getElementById('countdownTime');
-    const countdownBarElement = document.getElementById('countdownBar');
-    
-    if (countdownTimeElement) {
-        countdownTimeElement.textContent = remainingTime;
-    }
-    
-    if (countdownBarElement) {
-        countdownBarElement.style.width = '100%';
-    }
+    // Supprimer automatiquement après 3 secondes
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 3000);
 }
 
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
-    // Charger les paramètres
-    loadSavedSettings();
+    log.success('🚀 WebUI Star Deception initialisée');
+    log.config(`Mode initial: ${currentViewMode} | Refresh: ${refreshRate}s`);
     
-    // Ajouter les event listeners
-    document.getElementById('applySettings').addEventListener('click', applySettings);
+    // Détecter et définir le layout par défaut
+    setDefaultLayout();
     
-    // Event listeners pour appliquer avec Entrée
-    document.getElementById('refreshRate').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') applySettings();
-    });
+    // Configurer les valeurs initiales
+    document.getElementById('refreshRate').value = refreshRate;
+    document.getElementById('baseUrl').value = baseUrl;
     
-    document.getElementById('dataUrl').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') applySettings();
-    });
+    // Définir la vue initiale
+    document.body.className = 'view-servers';
+    applyLayoutMode();
     
-    // Animation initiale des cartes existantes
-    const cards = document.querySelectorAll('.server-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'all 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
+    // Gérer le toggle des vues
+    const viewToggle = document.getElementById('viewToggle');
+    if (viewToggle) {
+        viewToggle.addEventListener('change', toggleView);
+    }
     
-    // Démarrer le système de refresh
-    startRefreshSystem();
+    // Gérer le toggle du layout
+    const layoutToggle = document.getElementById('layoutToggle');
+    if (layoutToggle) {
+        layoutToggle.addEventListener('change', toggleLayout);
+    }
     
-    console.log('WebUI initialisée avec refresh automatique');
+    // Gérer le bouton d'application des paramètres
+    const applyButton = document.getElementById('applySettings');
+    if (applyButton) {
+        applyButton.addEventListener('click', function() {
+            refreshRate = parseInt(document.getElementById('refreshRate').value);
+            baseUrl = document.getElementById('baseUrl').value.trim();
+            
+            log.config('Nouveaux paramètres appliqués:', {
+                refreshRate,
+                baseUrl,
+                serversUrl: getServersUrl(),
+                playersUrl: getPlayersUrl(),
+                currentViewMode
+            });
+            
+            remainingTime = refreshRate;
+            startRefreshInterval();
+            refreshData();
+            
+            showSuccess('Paramètres appliqués avec succès !');
+        });
+    }
+    
+    // Ne démarrer l'actualisation automatique que si l'URL de base est configurée
+    if (baseUrl.trim() !== '') {
+        startRefreshInterval();
+        // Première actualisation
+        refreshData();
+    }
+});
+
+// Redétecter le layout lors du redimensionnement
+window.addEventListener('resize', function() {
+    const device = detectDevice();
+    const newDefaultLayout = (device === 'mobile') ? 'list' : 'grid';
+    
+    // Si l'utilisateur n'a pas changé manuellement le layout, l'adapter automatiquement
+    if (currentLayoutMode !== newDefaultLayout) {
+        log.config(`🔄 Redimensionnement détecté - Nouveau layout suggéré: ${newDefaultLayout}`);
+        // Note: On ne change pas automatiquement pour respecter le choix de l'utilisateur
+        // currentLayoutMode = newDefaultLayout;
+        // applyLayoutMode();
+    }
 });
 
 // Ajouter les styles CSS pour les animations
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes slideInToast {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutToast {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
     .no-servers {
         grid-column: 1 / -1;
         text-align: center;

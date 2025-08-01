@@ -10,24 +10,31 @@ Une application web Node.js pour afficher les serveurs Star Deception sous forme
    npm install
    ```
 
-## Utilisation
+## 🚀 Démarrage du serveur
 
 ### Se déplacer dans WebUI :
 ```bash
 cd ./WebUI
 ```
 
-### Démarrer le serveur de développement :
+### 🎯 Démarrage avec port personnalisé
+
+#### Méthode 1 : Argument de ligne de commande (Recommandé)
 ```bash
-npm run dev
+node server.js --port=8080
 ```
 
-### Démarrer le serveur en production :
-```bash
-npm start
+#### Méthode 2 : Variable d'environnement
+```powershell
+# PowerShell
+$env:PORT=8080; node server.js
 ```
 
-L'application sera accessible sur http://localhost:3000
+### 🌐 Accès à l'application
+
+L'application sera accessible sur :
+- Port par défaut : http://localhost:8080
+- Port personnalisé : http://localhost:[VOTRE_PORT]
 
 ## Technologies utilisées
 

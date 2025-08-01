@@ -22,13 +22,43 @@
             
             <!-- Contrôles de configuration -->
             <div class="controls">
+                <!-- Bouton toggle pour basculer entre serveurs et joueurs -->
+                <div class="control-group toggle-group">
+                    <label for="viewToggle">📊 Affichage:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="viewToggle" class="toggle-input">
+                        <label for="viewToggle" class="toggle-label">
+                            <span class="toggle-inner">
+                                <span class="toggle-option active">🖥️ Serveurs</span>
+                                <span class="toggle-option">👥 Joueurs</span>
+                            </span>
+                            <span class="toggle-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Bouton toggle pour basculer entre grille et liste -->
+                <div class="control-group toggle-group">
+                    <label for="layoutToggle">🔳 Layout:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="layoutToggle" class="toggle-input">
+                        <label for="layoutToggle" class="toggle-label">
+                            <span class="toggle-inner">
+                                <span class="toggle-option active">📱 Grille</span>
+                                <span class="toggle-option">📋 Liste</span>
+                            </span>
+                            <span class="toggle-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
                 <div class="control-group">
                     <label for="refreshRate">⏱️ Refresh (sec):</label>
                     <input type="number" id="refreshRate" value="30" min="5" max="300" step="5">
                 </div>
                 <div class="control-group">
-                    <label for="dataUrl">🌐 URL des données:</label>
-                    <input type="text" id="dataUrl" value="https://api.example.com/servers" placeholder="https://api.example.com/servers">
+                    <label for="baseUrl">🌐 URL de Base:</label>
+                    <input type="text" id="baseUrl" value="" placeholder="https://api.example.com">
                 </div>
                 <div class="control-group">
                     <button id="applySettings" class="apply-btn">✅ Appliquer</button>
@@ -53,8 +83,15 @@
                 <p>⚠️ <%= error %></p>
             </div>
         <% } %>
+        
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="info-message">
+                <p>ℹ️ <%= message %></p>
+            </div>
+        <% } %>
 
-        <div class="stats">
+        <!-- Stats Serveurs -->
+        <div class="stats servers-stats">
             <div class="stat-card">
                 <h3><%= servers.length %></h3>
                 <p>Serveurs Total</p>
@@ -69,6 +106,23 @@
             </div>
         </div>
 
+        <!-- Stats Joueurs -->
+        <div class="stats players-stats" style="display: none;">
+            <div class="stat-card">
+                <h3 id="totalPlayers"><%= players.length %></h3>
+                <p>Joueurs Total</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="uniqueServers">0</h3>
+                <p>Serveurs Actifs</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="recentlyUpdated">0</h3>
+                <p>Récemment Actifs</p>
+            </div>
+        </div>
+
+        <!-- Grille des serveurs -->
         <div class="servers-grid">
             <% servers.forEach(server => { %>
                 <div class="server-card <%= server.is_free === 1 ? 'free' : 'occupied' %>">
@@ -124,6 +178,11 @@
                     </div>
                 </div>
             <% }); %>
+        </div>
+
+        <!-- Grille des joueurs -->
+        <div class="players-grid" style="display: none;">
+            <!-- Les joueurs seront ajoutés dynamiquement via JavaScript -->
         </div>
 
         <% if (servers.length === 0) { %>
