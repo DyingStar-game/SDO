@@ -4,7 +4,7 @@
   <img src="public/Logo.png" alt="StarDeception Logo" width="150" height="150">
 </div>
 
-Une application web Node.js pour afficher les serveurs Star Deception sous forme de cartes dans une grille.
+Une application web Node.js pour afficher les informations relatives aux serveurs et joueurs de Star Deception.
 
 ## Installation
 
@@ -16,9 +16,9 @@ Une application web Node.js pour afficher les serveurs Star Deception sous forme
 
 ## 🚀 Démarrage du serveur
 
-### Se déplacer dans WebUI :
+### Se déplacer dans Sentinel :
 ```bash
-cd ./WebUI
+cd ./Sentinel
 ```
 
 ### 🎯 Démarrage avec port personnalisé
