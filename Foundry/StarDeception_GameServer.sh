@@ -324,7 +324,7 @@ main() {
 # Check if we're in the right directory
 if [[ ! -f "./scripts/create_servers.sh" ]] || [[ ! -f "./scripts/delete_servers.sh" ]] || [[ ! -f "./scripts/start_all_servers.sh" ]]; then
     echo -e "${RED}✗ Error: Required scripts not found in scripts/ directory${NC}"
-    echo "Please make sure you're running this script from the script_deploy_game_server directory"
+    echo "Please make sure you're running this script from the Foundry directory"
     echo "and that scripts/create_servers.sh, scripts/delete_servers.sh, and scripts/start_all_servers.sh exist."
     exit 1
 fi

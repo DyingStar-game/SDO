@@ -9,7 +9,7 @@ https://????????????
 # Download instructions:
 # 1. Click on the link above
 # 2. Download the file StarDeception.dedicated_server.x86_64
-# 3. Place it in the same folder as this file (script_deploy_game_server/src/)
+# 3. Place it in the same folder as this file (Foundry/src/)
 # 4. Make sure the file has execution permissions (chmod +x StarDeception.dedicated_server.x86_64)
 #
 # The script StarDeception.dedicated_server.sh expects to find the binary file in this folder.

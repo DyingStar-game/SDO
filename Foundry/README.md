@@ -6,7 +6,7 @@ Simple interactive script to manage StarDeception game servers.
 
 ### 1. Go in the right folder
 ```bash
-cd ./SDO/script_deploy_game_server
+cd ./SDO/Foundry
 ```
 
 ### 2. Run the Manager
@@ -34,7 +34,7 @@ The script will automatically handle the dedicated server binary download when n
 ## 📁 What Gets Created
 
 ```
-script_deploy_game_server/
+Foundry/
 ├── StarDeception_GameServer.sh    # Main script (run this)
 ├── scripts/                       # Helper scripts (auto-managed)
 ├── src/                          # Server binary and config
