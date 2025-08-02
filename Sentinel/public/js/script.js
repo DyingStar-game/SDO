@@ -87,6 +87,40 @@ function getPlayersUrl() {
     return buildUrl('players');
 }
 
+// Fonctions de gestion du loader
+function showLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'flex';
+        log.info('🔄 Loader affiché');
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'none';
+        log.info('✅ Loader masqué');
+    }
+}
+
+// Fonctions de gestion du compteur de refresh
+function showCountdownContainer() {
+    const countdownContainer = document.getElementById('countdownContainer');
+    if (countdownContainer) {
+        countdownContainer.style.display = 'block';
+        log.info('⏱️ Compteur de refresh affiché');
+    }
+}
+
+function hideCountdownContainer() {
+    const countdownContainer = document.getElementById('countdownContainer');
+    if (countdownContainer) {
+        countdownContainer.style.display = 'none';
+        log.info('⏱️ Compteur de refresh masqué');
+    }
+}
+
 // Fonction principale d'actualisation des données
 function refreshData() {
     if (currentViewMode === 'servers') {
@@ -104,6 +138,7 @@ function refreshServers() {
     if (!serversUrl || serversUrl.trim() === '') {
         log.warning('URL de base non configurée, actualisation des serveurs ignorée');
         showError('Veuillez configurer l\'URL de base avant l\'actualisation');
+        hideLoader();
         return;
     }
     
@@ -132,6 +167,9 @@ function refreshServers() {
         .catch(error => {
             log.error(`Erreur lors de l'actualisation des serveurs: ${error.message}`);
             showError(`Erreur serveurs: ${error.message}`);
+        })
+        .finally(() => {
+            hideLoader();
         });
 }
 
@@ -143,6 +181,7 @@ function refreshPlayers() {
     if (!playersUrl || playersUrl.trim() === '') {
         log.warning('URL de base non configurée, actualisation des joueurs ignorée');
         showError('Veuillez configurer l\'URL de base avant l\'actualisation');
+        hideLoader();
         return;
     }
     
@@ -171,6 +210,9 @@ function refreshPlayers() {
         .catch(error => {
             log.error(`Erreur lors de l'actualisation des joueurs: ${error.message}`);
             showError(`Erreur joueurs: ${error.message}`);
+        })
+        .finally(() => {
+            hideLoader();
         });
 }
 
@@ -390,6 +432,16 @@ function startRefreshInterval() {
     if (refreshInterval) clearInterval(refreshInterval);
     if (countdownInterval) clearInterval(countdownInterval);
     
+    // Vérifier si une URL est configurée
+    if (!baseUrl || baseUrl.trim() === '') {
+        hideCountdownContainer();
+        log.warning('⚠️ Pas d\'URL configurée - Intervalles de refresh non démarrés');
+        return;
+    }
+    
+    // Afficher le compteur de refresh
+    showCountdownContainer();
+    
     // Démarrer les nouveaux intervalles
     refreshInterval = setInterval(refreshData, refreshRate * 1000);
     
@@ -402,6 +454,20 @@ function startRefreshInterval() {
             remainingTime = refreshRate;
         }
     }, 1000);
+}
+
+// Fonction pour arrêter les intervalles de refresh
+function stopRefreshInterval() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    hideCountdownContainer();
+    log.info('🛑 Intervalles de refresh arrêtés');
 }
 
 // Mise à jour du compteur visuel
@@ -596,10 +662,18 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             remainingTime = refreshRate;
-            startRefreshInterval();
-            refreshData();
             
-            showSuccess('Paramètres appliqués avec succès !');
+            // Si une URL est configurée, démarrer le refresh et afficher le loader
+            if (baseUrl.trim() !== '') {
+                showLoader();
+                startRefreshInterval();
+                refreshData();
+                showSuccess('Paramètres appliqués avec succès !');
+            } else {
+                // Si pas d'URL, arrêter les intervalles et masquer le compteur
+                stopRefreshInterval();
+                showSuccess('Paramètres sauvegardés. Ajoutez une URL pour activer le refresh automatique.');
+            }
         });
     }
     
@@ -608,6 +682,10 @@ document.addEventListener('DOMContentLoaded', function() {
         startRefreshInterval();
         // Première actualisation
         refreshData();
+    } else {
+        // S'assurer que le compteur est masqué au démarrage si pas d'URL
+        hideCountdownContainer();
+        log.info('💡 Aucune URL configurée - Veuillez entrer une URL et cliquer sur Appliquer');
     }
 });
 

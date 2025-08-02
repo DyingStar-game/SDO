@@ -63,7 +63,7 @@
                 </div>
                 <div class="control-group">
                     <button id="applySettings" class="apply-btn">✅ Appliquer</button>
-                    <div class="countdown-container">
+                    <div id="countdownContainer" class="countdown-container" style="display: none;">
                         <span class="countdown-label">Prochain refresh dans:</span>
                         <div class="countdown-display">
                             <span id="countdownTime" class="countdown-time">30</span>
@@ -90,6 +90,16 @@
                 <p>ℹ️ <%= message %></p>
             </div>
         <% } %>
+
+        <!-- Loader -->
+        <div id="loader" class="loader-overlay" style="display: none;">
+            <div class="loader-container">
+                <div class="cube"><div class="cube__inner"></div></div>
+                <div class="cube"><div class="cube__inner"></div></div>
+                <div class="cube"><div class="cube__inner"></div></div>
+            </div>
+            <p class="loader-text">Chargement des données...</p>
+        </div>
 
         <!-- Stats Serveurs -->
         <div class="stats servers-stats">
@@ -197,7 +207,7 @@
         <div class="container">
             <p>&copy; 2025 Star Deception Sentinel - Données mises à jour automatiquement</p>
             <p>
-                <a href="https://github.com/StarDeception/SDO" target="_blank" rel="noopener noreferrer" style="color: #00d4aa; text-decoration: none;">
+                <a href="https://github.com/StarDeception/SDO/tree/main/Sentinel" target="_blank" rel="noopener noreferrer" style="color: #00d4aa; text-decoration: none;">
                     📡 Voir sur GitHub
                 </a>
             </p>
