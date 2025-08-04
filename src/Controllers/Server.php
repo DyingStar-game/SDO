@@ -24,24 +24,31 @@ final class Server
       throw new Exception("Data not right", 400);
     }
 
+    $server = $this->registerGameServer();
+
+    $response->getBody()->write(json_encode($server));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
+
+  public function registerGameServer($name, $port)
+  {
+
     // Because crash or just restart, search in DB if exists
-    $myServer = \App\Models\Server::where('name', $data['name'])->first();
+    $myServer = \App\Models\Server::where('name', $name)->first();
     if (!is_null($myServer))
     {
-      $myServer->port = $data['port'];
+      $myServer->port = $port;
       $myServer->current_players = 0;
 
       $myServer->save();
-      // return response
-      $response->getBody()->write(json_encode($myServer));
-      return $response->withHeader('Content-Type', 'application/json');
+      return $myServer;
     }
 
     $serversCnt = \App\Models\Server::count();
     $server = new \App\Models\Server();
 
-    $server->name = $data['name'];
-    $server->port = $data['port'];
+    $server->name = $name;
+    $server->port = $port;
     $server->ip = $_SERVER['REMOTE_ADDR'];
 
     $server->x_start = -10000000;
@@ -55,9 +62,7 @@ final class Server
       $server->is_free = false;
     }
     $server->save();
-
-    $response->getBody()->write(json_encode(['id' => $server->id]));
-    return $response->withHeader('Content-Type', 'application/json');
+    return $server;
   }
 
   /**
@@ -339,17 +344,14 @@ final class Server
     return $response->withHeader('Content-Type', 'application/json');
   }
 
-
-  private function splitServer(\App\Models\Server $server, $players)
+  /**
+   * Because a server is too heavy, we split it
+   */
+  public function splitServer(\App\Models\Server $server, $players)
   {
     // $players = list of players and their coordinates
-
-    $server = \App\Models\Server::where('id', $server->id)->first();
-    if (is_null($server))
-    {
-      throw new Exception("Server not found", 404);
-    }
-    file_put_contents('/tmp/debug', print_r($players, true));
+    // Debug
+    // file_put_contents('/tmp/debug', print_r($players, true));
     // Split the server zone
 
     // detect the x, y of z where the players are on about the same plan.
@@ -479,13 +481,13 @@ final class Server
     $max = 0;
     foreach ($players as $player)
     {
-      if ($player[$property] < $min)
+      if ($player->{$property} < $min)
       {
-        $min = $player[$property];
+        $min = $player->{$property};
       }
-      if ($player[$property] > $max)
+      if ($player->{$property} > $max)
       {
-        $max = $player[$property];
+        $max = $player->{$property};
       }
     }
     return $max - $min;
@@ -497,7 +499,7 @@ final class Server
     $sum = 0;
     foreach ($players as $player)
     {
-      $sum += $player[$property];
+      $sum += $player->{$property};
     }
     return (int) ceil($sum / count($players));
 
@@ -506,7 +508,7 @@ final class Server
     $values = [];
     foreach ($players as $player)
     {
-      $values[] = $player[$property];
+      $values[] = $player->{$property};
     }
 
     $count = count($values); //total numbers in array
@@ -681,8 +683,9 @@ final class Server
       $server->save();
     }
 
-
-    return $serversModifications;
+    // Publish new server list
+    \App\Controllers\Topics\Server::publishServersList();
+    // return $serversModifications;
   }
 
   /**

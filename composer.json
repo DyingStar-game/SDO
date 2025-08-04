@@ -9,7 +9,9 @@
         "slim/psr7": "^1.7",
         "robmorgan/phinx": "^0.16.10",
         "illuminate/database": "^12.21",
-        "illuminate/events": "^12.21"
+        "illuminate/events": "^12.21",
+        "php-mqtt/client": "^2.2",
+        "respect/validation": "^2.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.5",

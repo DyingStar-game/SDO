@@ -20,6 +20,9 @@ final class PlayersCreation extends AbstractMigration
       ->addColumn('x', 'string')
       ->addColumn('y', 'string')
       ->addColumn('z', 'string')
+      ->addColumn('xr', 'string')
+      ->addColumn('yr', 'string')
+      ->addColumn('zr', 'string')
       ->addIndex(['server_id'])
       ->addIndex(['client_uuid'])
       ->create();

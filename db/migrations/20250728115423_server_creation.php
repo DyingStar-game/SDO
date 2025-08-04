@@ -40,6 +40,7 @@ final class ServerCreation extends AbstractMigration
       ->addColumn('is_free', 'boolean', ['null' => false, 'default' => true])
       ->addColumn('is_online', 'boolean', ['null' => false, 'default' => true])
       ->addColumn('to_merge_server_id', 'boolean', ['null' => true])
+      ->addColumn('to_split_server_id', 'boolean', ['null' => true])
       ->addColumn('x_size', 'integer')
       ->addColumn('y_size', 'integer')
       ->addColumn('z_size', 'integer')

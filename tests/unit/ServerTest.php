@@ -25,11 +25,8 @@ final class ServerTest extends TestCase
 
   public function testMiddlePlayersOnAxis(): void
   {
-    $players = [
-      ['x' => 0],
-      ['x' => 10],
-      ['x' => 60]
-    ];
+    $message = '{"id":1,"players":[{"x":0,"y":0,"z":2160},{"x":10,"y":0,"z":2158},{"x":60,"y":0,"z":2151}]}';
+    $jsonMessage = json_decode($message);
 
     $server = new \App\Controllers\Server();
 
@@ -37,10 +34,24 @@ final class ServerTest extends TestCase
     $method = $reflection->getMethod('middlePlayersOnAxis');
     $method->setAccessible(true);
 
-    $coordinate = $method->invoke($server, $players, 'x');
-    $this->assertEquals(1000, $coordinate);
-    print_r($$coordinate);
+    $coordinate = $method->invoke($server, $jsonMessage->players, 'x');
+    $this->assertEquals(24, $coordinate);
+  }
 
+  public function testDistanceMax(): void
+  {
+    $message = '{"id":1,"players":[{"x":-5,"y":0,"z":2160},{"x":10,"y":0,"z":2158},{"x":60,"y":0,"z":2151}]}';
+    $jsonMessage = json_decode($message);
+
+    $server = new \App\Controllers\Server();
+
+    $reflection = new \ReflectionClass($server);
+    $method = $reflection->getMethod('distanceMax');
+    $method->setAccessible(true);
+
+    $distance = $method->invoke($server, $jsonMessage->players, 'x');
+
+    $this->assertEquals(65, $distance);
 
   }
 }
