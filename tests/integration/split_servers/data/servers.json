@@ -1,0 +1,47 @@
+[
+    {
+        "name": "gameserver0101",
+        "max_players": 32,
+        "current_players": 10,
+        "x_start": -100000,
+        "x_end": 100000,
+        "y_start": -100000,
+        "y_end": 100000,
+        "z_start": -100000,
+        "z_end": 100000,
+        "is_free": false,
+        "x_size": 200000,
+        "y_size": 200000,
+        "z_size": 200000
+    },
+    {
+        "name": "gameserver0102",
+        "max_players": 32,
+        "current_players": 0,
+        "x_start": -100000,
+        "x_end": 100000,
+        "y_start": -100000,
+        "y_end": 100000,
+        "z_start": -100000,
+        "z_end": 100000,
+        "is_free": true,
+        "x_size": 200000,
+        "y_size": 200000,
+        "z_size": 200000
+    },
+    {
+        "name": "gameserver0103",
+        "max_players": 32,
+        "current_players": 0,
+        "x_start": -100000,
+        "x_end": 100000,
+        "y_start": -100000,
+        "y_end": 100000,
+        "z_start": -100000,
+        "z_end": 100000,
+        "is_free": true,
+        "x_size": 200000,
+        "y_size": 200000,
+        "z_size": 200000
+    }
+]
