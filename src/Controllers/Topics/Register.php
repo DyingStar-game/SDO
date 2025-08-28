@@ -19,6 +19,13 @@ final class Register
             // {"name": "gameserver0201", "ip": "10.0.0.1", "port": 7050}
             $jsonMessage = json_decode($message);
 
+            // for dev, if ip = 127.0.0.1, I clean the database
+            if ($jsonMessage->ip == "127.0.0.1" && $jsonMessage->name == 'gameserverDev01')
+            {
+                \App\Models\Server::truncate();
+                \App\Models\Player::truncate();
+            }
+
             // Because crash or just restart, search in DB if exists
             $myServer = \App\Models\Server::where('name', $jsonMessage->name)->first();
             if (!is_null($myServer))
