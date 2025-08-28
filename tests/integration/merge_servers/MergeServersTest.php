@@ -84,7 +84,7 @@ final class MergeServersTest extends TestCase
 
     // run CRON
     $ctrlServer = new \App\Controllers\Server();
-    $ctrlServer->manageOneServerBranch([]);
+    $serversToPublish = $ctrlServer->manageOneServerBranch([], false);
 
     $serversToMerge = \App\Models\Server::
         whereNotNull('to_merge_server_id')
@@ -96,6 +96,30 @@ final class MergeServersTest extends TestCase
     $this->assertNotNull($serverDestination);
 
     $this->assertEquals($serverDestination->id, $serversToMerge[0]['to_merge_server_id']);
+
+    $serverMapping = $this->getServersMapping();
+
+    // verification servers to publish, must be 108 and 107
+    $this->assertEquals(2, count($serversToPublish));
+    $ids = [];
+    foreach ($serversToPublish as $srv)
+    {
+      $ids[] = $srv->name;
+    }
+    $this->assertEquals(['gameserver0108', 'gameserver0107'], $ids);
+
+    foreach ($serversToPublish as $srv)
+    {
+      switch ($srv->name) {
+        case 'gameserver0108':
+          $this->assertEquals($serverMapping['gameserver0107'], $srv->to_merge_server_id);
+          break;
+        
+        case 'gameserver0107':
+          $this->assertNull($srv->to_merge_server_id);
+          break;
+      }
+    }
   }
 
   public function testMergeMultipleServersSameTime(): void
@@ -112,9 +136,11 @@ final class MergeServersTest extends TestCase
     ];
     $this->setCurrentPlayerNumber($defaultPlayersNumber, $specificPlayersNumber);
 
+    // TODO merge in 2 times, because a server can be merged on a server will be merged
+
     // run CRON
     $ctrlServer = new \App\Controllers\Server();
-    $ctrlServer->manageOneServerBranch([]);
+    $serversToPublish = $ctrlServer->manageOneServerBranch([], false);
 
     $serversToMerge = \App\Models\Server::
         whereNotNull('to_merge_server_id')
@@ -122,6 +148,33 @@ final class MergeServersTest extends TestCase
 
     $this->assertEquals(2, count($serversToMerge));
 
+    $serverMapping = $this->getServersMapping();
+
+    // verification servers to publish, must be 108 and 107 and 106
+    $this->assertEquals(3, count($serversToPublish));
+    $ids = [];
+    foreach ($serversToPublish as $srv)
+    {
+      $ids[] = $srv->name;
+    }
+    $this->assertEquals(['gameserver0108', 'gameserver0107', 'gameserver0106'], $ids);
+
+    foreach ($serversToPublish as $srv)
+    {
+      switch ($srv->name) {
+        case 'gameserver0108':
+          $this->assertEquals($serverMapping['gameserver0106'], $srv->to_merge_server_id);
+          break;
+        
+        case 'gameserver0107':
+          $this->assertEquals($serverMapping['gameserver0107'], $srv->to_merge_server_id);
+          break;
+
+        case 'gameserver0106':
+          $this->assertNull($srv->to_merge_server_id);
+          break;
+      }
+    }
   }
 
   private function setCurrentPlayerNumber(int $default, array $specific)
@@ -147,5 +200,19 @@ final class MergeServersTest extends TestCase
       $server->to_merge_server_id = null;
       $server->save();
     }
+  }
+
+  /**
+   * mapping serverne -> id
+   */
+  private function getServersMapping()
+  {
+    $list = [];
+    $servers = \App\Models\Server::get();
+    foreach ($servers as $server)
+    {
+      $list[$server->name] = $server->id;
+    }
+    return $list;
   }
 }

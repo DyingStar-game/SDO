@@ -72,7 +72,26 @@ final class SplitServersTest extends TestCase
 
     $srv = \App\Models\Server::where('is_free', false)->first();
 
-    $message = '{"id":' . $srv->id . ',"players":[{"x":2176,"y":0,"z":2160},{"x":2178,"y":0,"z":2158},{"x":2167,"y":0,"z":2151}]}';
+    $message = json_encode([
+      'id'      => $srv->id,
+      "players" => [
+        [
+          'x' => -11.2676525115967,
+          'y' => 1999.66943359375,
+          'z' => -24.9779491424561
+        ],
+        [
+          'x' => -15.7486991882324,
+          'y' => 1999.66809082031,
+          'z' => -22.5385055541992
+        ],
+        [
+          'x' => 2.38979363441467,
+          'y' => 1999.93762207031,
+          'z' => 4.65553188323975
+        ]
+      ]
+    ]);
 
     $topicServer = new \App\Controllers\Topics\Server();
     $topicServer->ServerTooHeavy(
@@ -83,6 +102,35 @@ final class SplitServersTest extends TestCase
 
     $servers = \App\Models\Server::where('is_free', false)->get();
     $this->assertEquals(2, count($servers), 'must have 2 servers used');
+
+    // calcul here
+    // Distance
+    // x = 18.13849282264707
+    // y = 0.26953125
+    // z = 29.63348102569585  => will cut on this
+    //
+    // Middle
+    // z = -14.286974271138519
+
+
+    // verification of server coordinates
+    $server1 = $servers[0];
+    $this->assertEquals(1, $server1->id);
+    $this->assertEquals(-10000000.0, $server1->x_start);
+    $this->assertEquals(10000000.0, $server1->x_end);
+    $this->assertEquals(-10000000.0, $server1->y_start);
+    $this->assertEquals(10000000.0, $server1->y_end);
+    $this->assertEquals(-10000000.0, $server1->z_start);
+    $this->assertEquals(-14.2869742711, $server1->z_end);
+
+    $server2 = $servers[1];
+    $this->assertEquals(2, $server2->id);
+    $this->assertEquals(-10000000.0, $server2->x_start);
+    $this->assertEquals(10000000.0, $server2->x_end);
+    $this->assertEquals(-10000000.0, $server2->y_start);
+    $this->assertEquals(10000000.0, $server2->y_end);
+    $this->assertEquals(-14.2869742711, $server2->z_start);
+    $this->assertEquals(10000000.0, $server2->z_end);
 
   }
 
