@@ -38,9 +38,13 @@ final class ServerTest extends TestCase
     $this->assertEquals(24, $coordinate);
   }
 
-  public function testDistanceMax(): void
+  /**
+   * @dataProvider provideDistanceMax
+   */
+  public function testDistanceMax($data, $expected): void
   {
-    $message = '{"id":1,"players":[{"x":-5,"y":0,"z":2160},{"x":10,"y":0,"z":2158},{"x":60,"y":0,"z":2151}]}';
+    $message = '{"id":1,"players":[{"x":' . $data[0] . '},{"x":' . $data[1] . '},{"x":' . $data[2] . '}]}';
+
     $jsonMessage = json_decode($message);
 
     $server = new \App\Controllers\Server();
@@ -51,7 +55,15 @@ final class ServerTest extends TestCase
 
     $distance = $method->invoke($server, $jsonMessage->players, 'x');
 
-    $this->assertEquals(65, $distance);
+    $this->assertEquals($expected, $distance);
+  }
 
+  public static function provideDistanceMax()
+  {
+    return [
+      [[-11.2676525115967, -15.7486991882324, 2.38979363441467], 18.13849282264707],
+      [[1999.66943359375, 1999.66809082031, 1999.93762207031], 0.26953125],
+      [[-24.9779491424561, -22.5385055541992, 4.65553188323975], 29.63348102569585],
+    ];
   }
 }

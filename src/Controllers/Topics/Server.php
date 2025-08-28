@@ -154,6 +154,7 @@ final class Server
       }
       // a new server is free, we send list of servers
       $this->publishServersList();
+      $this->publishServersChanges([], [$server, $serverMerge]);
     }
   }
 

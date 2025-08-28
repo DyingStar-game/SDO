@@ -51,12 +51,12 @@ final class Server
     $server->port = $port;
     $server->ip = $_SERVER['REMOTE_ADDR'];
 
-    $server->x_start = -10000000;
-    $server->x_end = 10000000;
-    $server->y_start = -10000000;
-    $server->y_end = 10000000;
-    $server->z_start = -10000000;
-    $server->z_end = 10000000;
+    $server->x_start = -10000000.0;
+    $server->x_end = 10000000.0;
+    $server->y_start = -10000000.0;
+    $server->y_end = 10000000.0;
+    $server->z_start = -10000000.0;
+    $server->z_end = 10000000.0;
     if ($serversCnt == 0)
     {
       $server->is_free = false;
@@ -117,12 +117,12 @@ final class Server
       {
         // not free this server with id 1 because for the moment all players connect to this
         $server->is_free = true;
-        $server->x_start = -10000000;
-        $server->x_end = 10000000;
-        $server->y_start = -10000000;
-        $server->y_end = 10000000;
-        $server->z_start = -10000000;
-        $server->z_end = 10000000;
+        $server->x_start = -10000000.0;
+        $server->x_end = 10000000.0;
+        $server->y_start = -10000000.0;
+        $server->y_end = 10000000.0;
+        $server->z_start = -10000000.0;
+        $server->z_end = 10000000.0;
       }
 
     } else {
@@ -148,12 +148,12 @@ final class Server
         {
           // not free this server with id 1 because for the moment all players connect to this
           $server->is_free = true;
-          $server->x_start = -10000000;
-          $server->x_end = 10000000;
-          $server->y_start = -10000000;
-          $server->y_end = 10000000;
-          $server->z_start = -10000000;
-          $server->z_end = 10000000;
+          $server->x_start = -10000000.0;
+          $server->x_end = 10000000.0;
+          $server->y_start = -10000000.0;
+          $server->y_end = 10000000.0;
+          $server->z_start = -10000000.0;
+          $server->z_end = 10000000.0;
         }
       } else {
         $serverMerge = \App\Models\Server::
@@ -178,12 +178,12 @@ final class Server
           {
             // not free this server with id 1 because for the moment all players connect to this
             $server->is_free = true;
-            $server->x_start = -10000000;
-            $server->x_end = 10000000;
-            $server->y_start = -10000000;
-            $server->y_end = 10000000;
-            $server->z_start = -10000000;
-            $server->z_end = 10000000;
+            $server->x_start = -10000000.0;
+            $server->x_end = 10000000.0;
+            $server->y_start = -10000000.0;
+            $server->y_end = 10000000.0;
+            $server->z_start = -10000000.0;
+            $server->z_end = 10000000.0;
           }
         }
       }
@@ -349,124 +349,59 @@ final class Server
    */
   public function splitServer(\App\Models\Server $server, $players)
   {
-    // $players = list of players and their coordinates
-    // Debug
-    // file_put_contents('/tmp/debug', print_r($players, true));
-    // Split the server zone
-
-    // detect the x, y of z where the players are on about the same plan.
-    // x min and x max
-    $distanceX = $this->distanceMax($players, 'x');
-    // y min and y max
-    $distanceY = $this->distanceMax($players, 'y');
-    // z min and z max
-    $distanceZ = $this->distanceMax($players, 'z');
-    // get too the axe more distant
+    // detect the x, y of z where the players have the greater distance.
+    $values = [
+      'x' => $this->distanceMax($players, 'x'),
+      'y' => $this->distanceMax($players, 'y'),
+      'z' => $this->distanceMax($players, 'z'),
+    ];
     $fixedAxis = '';
-    if ($distanceX <= $distanceY)
-    {
-      $fixedAxis = 'x';
-      if ($distanceZ <= $distanceX)
-      {
-        $fixedAxis = 'z';
-      }
-    } else {
-      $fixedAxis = 'y';
-      if ($distanceZ <= $distanceY)
-      {
-        $fixedAxis = 'z';
-      }
-    }
+    arsort($values);
+    reset($values);
+    $fixedAxis = key($values);
 
-    // after get the middle on the other 2 coordinate
-    // sum all axe (for example y) of players and / number of players
-    // idem with another axe (for example z) / number of players
+    // Get the middle of the greater distance for cutting the server zone
     switch ($fixedAxis) {
       case 'x':
-        $middleY = $this->middlePlayersOnAxis($players, 'y');
-        $middleZ = $this->middlePlayersOnAxis($players, 'z');
-        if ($middleY > $middleZ)
-        {
-          $newServer = $this->createNewServer(
-            $server->x_start,
-            $server->x_end,
-            $middleY,
-            $server->y_end,
-            $server->z_start,
-            $server->z_end,
-          );
-          $this->setServerNewZone($server, $middleY, 'y');
-          return $newServer;
-        } else {
-          $newServer = $this->createNewServer(
-            $server->x_start,
-            $server->x_end,
-            $server->y_start,
-            $server->y_end,
-            $middleZ,
-            $server->z_end,
-          );
-          $this->setServerNewZone($server, $middleZ, 'z');
-          return $newServer;
-        }
+        $middle = $this->middlePlayersOnAxis($players, 'x');
+        $newServer = $this->createNewServer(
+          $middle,
+          $server->x_end,
+          $server->y_start,
+          $server->y_end,
+          $server->z_start,
+          $server->z_end,
+        );
+        $this->setServerNewZone($server, $middle, 'x');
+        return $newServer;
         break;
       
       case 'y':
-        $middleX = $this->middlePlayersOnAxis($players, 'x');
-        $middleZ = $this->middlePlayersOnAxis($players, 'z');
-        if ($middleX > $middleZ)
-        {
-          $newServer = $this->createNewServer(
-            $middleX,
-            $server->x_end,
-            $server->y_start,
-            $server->y_end,
-            $server->z_start,
-            $server->z_end,
-          );
-          $this->setServerNewZone($server, $middleX, 'x');
-          return $newServer;
-        } else {
-          $newServer = $this->createNewServer(
-            $server->x_start,
-            $server->x_end,
-            $server->y_start,
-            $server->y_end,
-            $middleZ,
-            $server->z_end,
-          );
-          $this->setServerNewZone($server, $middleZ, 'z');
-          return $newServer;
-        }
+        $middle = $this->middlePlayersOnAxis($players, 'y');
+        $newServer = $this->createNewServer(
+          $server->x_start,
+          $server->x_end,
+          $middle,
+          $server->y_end,
+          $server->z_start,
+          $server->z_end,
+        );
+        $this->setServerNewZone($server, $middle, 'y');
+        return $newServer;
         break;
       
       case 'z':
-        $middleX = $this->middlePlayersOnAxis($players, 'x');
-        $middleY = $this->middlePlayersOnAxis($players, 'y');
-        if ($middleX > $middleY)
-        {
-          $newServer = $this->createNewServer(
-            $middleX,
-            $server->x_end,
-            $server->y_start,
-            $server->y_end,
-            $server->z_start,
-            $server->z_end,
-          );
-          $this->setServerNewZone($server, $middleX, 'x');
-          return $newServer;
-        } else {
-          $newServer = $this->createNewServer(
-            $server->x_start,
-            $server->x_end,
-            $middleY,
-            $server->y_end,
-            $server->z_start,
-            $server->z_end,
-          );
-          $this->setServerNewZone($server, $middleY, 'y');
-          return $newServer;
-        }
+        $middle = $this->middlePlayersOnAxis($players, 'z');
+        $newServer = $this->createNewServer(
+          $server->x_start,
+          $server->x_end,
+          $server->y_start,
+          $server->y_end,
+          $middle,
+          $server->z_end,
+        );
+        $this->setServerNewZone($server, $middle, 'z');
+        return $newServer;
         break;
     }
     throw new Exception("Error", 500);
@@ -477,17 +412,17 @@ final class Server
    */
   private function distanceMax(array $players, string $property)
   {
-    $min = 0;
-    $max = 0;
+    $min = round($players[0]->{$property}, 20);
+    $max = round($players[0]->{$property}, 20);
     foreach ($players as $player)
     {
-      if ($player->{$property} < $min)
+      if (round($player->{$property}, 20) < $min)
       {
-        $min = $player->{$property};
+        $min = round($player->{$property}, 20);
       }
-      if ($player->{$property} > $max)
+      if (round($player->{$property}, 20) > $max)
       {
-        $max = $player->{$property};
+        $max = round($player->{$property}, 20);
       }
     }
     return $max - $min;
@@ -501,7 +436,7 @@ final class Server
     {
       $sum += $player->{$property};
     }
-    return (int) ceil($sum / count($players));
+    return round($sum / count($players), 10);
 
     // median TODO
 
@@ -547,12 +482,12 @@ final class Server
    * Create a new game server, use free server and set the zone
    */
   private function createNewServer(
-    int $xStart,
-    int $xEnd,
-    int $yStart,
-    int $yEnd,
-    int $zStart,
-    int $zEnd,
+    float $xStart,
+    float $xEnd,
+    float $yStart,
+    float $yEnd,
+    float $zStart,
+    float $zEnd,
   )
   {
     $freeServer = \App\Models\Server::where('is_free', true)->first();
@@ -590,16 +525,19 @@ final class Server
    * 
    * @param array<int> list of servers yet checked
    */
-  public function manageOneServerBranch(array $serverIds)
+  public function manageOneServerBranch(array $serverIds, $publish = true)
   {
     global $serversModifications;
 
     $serversModifications = [];
+    $serversToPublish = [];
 
     // Minimum of players to try close server and push to another.
-    $minPlayers = 10;
+    $minPlayers = 6;
+    // $minPlayers = 0;
     // Max players a server could have (with previous server) to be merged
     $maxPlayers = 22;
+    // $maxPlayers = 32;
 
     $servers = \App\Models\Server::
         where('is_free', false)
@@ -619,18 +557,16 @@ final class Server
           )
       )
       {
-
         // No merge, next
         continue;
       }
       $this->server = $server;
-      // get parent servers
+      // get parent servers have 2 coordinates same
       $parentServers = array_merge(
         array_filter($servers->all(), [$this, 'getParentServersXY']),
         array_filter($servers->all(), [$this, 'getParentServersXZ']),
         array_filter($servers->all(), [$this, 'getParentServersYZ'])
       );
-// print_r($parentServers);
       // fetch parents
       foreach ($parentServers as $pserver)
       {
@@ -645,7 +581,6 @@ final class Server
             'current_players'    => $server->current_players,
             'to_merge_server_id' => $pserver->id,
           ];
-
           // Update in server the new zone
           $c = $this->mergeTwoServersCoordinates($server, $pserver);
           $server->x_start = $c['x_start'];
@@ -655,8 +590,8 @@ final class Server
           $server->z_start = $c['z_start'];
           $server->z_end   = $c['z_end'];
 
-
-
+          $serversToPublish[$server->id] = $server;
+          $serversToPublish[$pserver->id] = $pserver;
 
 
           // $serversModifications[$pserver->id] = [
@@ -684,7 +619,12 @@ final class Server
     }
 
     // Publish new server list
-    \App\Controllers\Topics\Server::publishServersList();
+    if ($publish)
+    {
+      \App\Controllers\Topics\Server::publishServersList();
+      \App\Controllers\Topics\Server::publishServersChanges([], $serversToPublish);
+    }
+    return $serversToPublish;
     // return $serversModifications;
   }
 
@@ -733,12 +673,12 @@ final class Server
   private function mergeTwoServersCoordinates($server, $pserver)
   {
     $c = [
-      "x_start" => 0,
-      "x_end"   => 0,
-      "y_start" => 0,
-      "y_end"   => 0,
-      "z_start" => 0,
-      "z_end"   => 0,
+      "x_start" => 0.0,
+      "x_end"   => 0.0,
+      "y_start" => 0.0,
+      "y_end"   => 0.0,
+      "z_start" => 0.0,
+      "z_end"   => 0.0,
     ];
     if ($server->x_start < $pserver->x_start)
     {
